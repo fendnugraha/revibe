@@ -44,7 +44,7 @@ const Navigation = () => {
                             </NavLink>
                         </li>
                         <li>
-                            <NavLink href="/order">
+                            <NavLink href="/order" active={pathName.startsWith("/order")}>
                                 <span className="w-16 h-14 flex items-center justify-center flex-shrink-0 text-slate-700">
                                     <ReceiptIcon size={20} />
                                 </span>

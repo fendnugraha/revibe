@@ -3,7 +3,7 @@ import axios from "@/libs/axios";
 import Input from "@/components/Input";
 import Button from "@/components/Button";
 
-const CreateCategoryProduct = ({ isModalOpen, notification, fetchProducts }) => {
+const CreateCategoryProduct = ({ isModalOpen, notification, fetchProductCategories }) => {
     const [errors, setErrors] = useState([]);
     const [newCategoryProduct, setNewCategoryProduct] = useState({
         name: "",
@@ -14,7 +14,7 @@ const CreateCategoryProduct = ({ isModalOpen, notification, fetchProducts }) => 
         e.preventDefault();
         try {
             const response = await axios.post("/api/product-categories", newCategoryProduct);
-            notification(response.data.message);
+            notification("success", response.data.message);
             if (response.status === 201) {
                 // Reset form fields and close modal on success
                 setNewCategoryProduct({
@@ -24,7 +24,7 @@ const CreateCategoryProduct = ({ isModalOpen, notification, fetchProducts }) => 
                 isModalOpen(false);
             }
 
-            fetchProducts();
+            fetchProductCategories();
         } catch (error) {
             setErrors(error.response?.data?.errors || ["Something went wrong."]);
         }

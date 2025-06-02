@@ -1,19 +1,29 @@
 "use client";
 import Button from "@/components/Button";
 import MainPage from "../../main";
-import { PencilIcon, PlusIcon, SearchIcon, TrashIcon } from "lucide-react";
+import { MessageCircleWarningIcon, PencilIcon, PlusIcon, SearchIcon, TrashIcon } from "lucide-react";
 import Input from "@/components/Input";
 import { useCallback, useEffect, useState } from "react";
 import Modal from "@/components/Modal";
 import CreateProduct from "./CreateProduct";
 import CreateCategoryProduct from "./CreateCategoryProduct";
+import axios from "@/libs/axios";
+import Notification from "@/components/Notification";
+import formatNumber from "@/libs/formatNumber";
+import EditProduct from "./EditProduct";
+import Paginator from "@/components/Paginator";
 
 const Product = () => {
     const [product, setProduct] = useState(null);
     const [productCategories, setProductCategories] = useState([]);
+    const [selectedProduct, setSelectedProduct] = useState([]);
+    const [selectedProductId, setSelectedProductId] = useState(null);
     const [loading, setLoading] = useState(false);
     const [search, setSearch] = useState("");
-    const [notification, setNotification] = useState("");
+    const [notification, setNotification] = useState({
+        type: "",
+        message: "",
+    });
     const [errors, setErrors] = useState([]); // Store validation errors
 
     const [isModalCreateProductOpen, setIsModalCreateProductOpen] = useState(false);
@@ -60,27 +70,60 @@ const Product = () => {
         return () => clearTimeout(timeout);
     }, [search, fetchProducts]);
 
-    const fetchProductCategories = async () => {
+    const fetchProductCategories = useCallback(async () => {
         try {
             const response = await axios.get("api/product-categories");
             setProductCategories(response.data.data);
         } catch (error) {
             setErrors(error.response?.message || ["Something went wrong."]);
         }
-    };
+    }, []);
 
     useEffect(() => {
         fetchProductCategories();
-    }, [product]);
+    }, [fetchProductCategories]);
 
     const handleChangePage = (url) => {
         fetchProducts(url);
     };
 
+    const handleSelectProduct = (id) => {
+        setSelectedProduct((prevSelected) => {
+            // Check if the ID is already in the selectedProduct array
+            if (prevSelected.includes(id)) {
+                // If it exists, remove it
+                return prevSelected.filter((productId) => productId !== id);
+            } else {
+                // If it doesn't exist, add it
+                return [...prevSelected, id];
+            }
+        });
+    };
+
+    const handleDeleteProduct = async (id) => {
+        try {
+            const response = await axios.delete(`api/products/${id}`);
+            setNotification({
+                type: "success",
+                message: response.data.message,
+            });
+            fetchProducts();
+        } catch (error) {
+            setErrors(error.response?.data?.errors || ["Something went wrong."]);
+            setNotification({
+                type: "error",
+                message: error.response?.data?.message || "Delete failed",
+            });
+        }
+    };
+
     return (
         <MainPage headerTitle="Product">
             <div className="p-8">
-                <div className="flex gap-2 my-4">
+                {notification.message && (
+                    <Notification type={notification.type} notification={notification.message} onClose={() => setNotification({ type: "", message: "" })} />
+                )}
+                <div className="flex gap-2 mb-4">
                     <Button buttonType="primary" onClick={() => setIsModalCreateProductOpen(true)} className={`flex item-center gap-2`}>
                         <PlusIcon size={20} /> Add Product
                     </Button>
@@ -91,7 +134,7 @@ const Product = () => {
                     <Modal isOpen={isModalCreateProductOpen} onClose={closeModal} modalTitle="Create account">
                         <CreateProduct
                             isModalOpen={setIsModalCreateProductOpen}
-                            notification={(message) => setNotification(message)}
+                            notification={(type, message) => setNotification({ type, message })}
                             fetchProducts={fetchProducts}
                             productCategories={productCategories}
                         />
@@ -99,8 +142,8 @@ const Product = () => {
                     <Modal isOpen={isModalCreateCategoryProductOpen} onClose={closeModal} modalTitle="Create account">
                         <CreateCategoryProduct
                             isModalOpen={setIsModalCreateCategoryProductOpen}
-                            notification={(message) => setNotification(message)}
-                            fetchProducts={fetchProducts}
+                            notification={(type, message) => setNotification({ type, message })}
+                            fetchProductCategories={fetchProductCategories}
                         />
                     </Modal>
                 </div>
@@ -117,7 +160,7 @@ const Product = () => {
                         autoComplete="off"
                     />
                 </div>
-                <div className="overflow-x-auto bg-white rounded-2xl">
+                <div className="overflow-x-auto bg-white rounded-2xl w-full sm:w-3/4 drop-shadow-sm">
                     <table className="table w-full text-xs">
                         <thead>
                             <tr>
@@ -148,19 +191,19 @@ const Product = () => {
                                         <td>
                                             {product.name}
                                             <span className="block text-xs text-slate-400">
-                                                {product.category} {formatNumber(product.sold)} terjual
+                                                {product.code} {product.category} {formatNumber(product.sold)} terjual
                                             </span>
                                         </td>
                                         <td>{formatNumber(product.price)}</td>
                                         <td>{formatNumber(product.cost)}</td>
                                         <td className="">
-                                            <span className="flex justify-center">
+                                            <span className="flex gap-2 justify-center">
                                                 <button
                                                     onClick={() => {
                                                         setSelectedProductId(product.id);
                                                         setIsModalUpdateProductOpen(true);
                                                     }}
-                                                    className="bg-indigo-500 py-2 px-4 rounded-lg text-white mr-2"
+                                                    className="cursor-pointer hover:scale-125 transition transform ease-in"
                                                 >
                                                     <PencilIcon className="size-4" />
                                                 </button>
@@ -169,7 +212,7 @@ const Product = () => {
                                                         setSelectedProductId(product.id);
                                                         setIsModalDeleteProductOpen(true);
                                                     }}
-                                                    className="bg-red-600 py-2 px-4 rounded-lg text-white"
+                                                    className="cursor-pointer hover:scale-125 transition transform ease-in"
                                                 >
                                                     <TrashIcon className="size-4" />
                                                 </button>
@@ -180,8 +223,39 @@ const Product = () => {
                             )}
                         </tbody>
                     </table>
+                    <div className="px-4">{product?.last_page > 1 && <Paginator links={product} handleChangePage={handleChangePage} />}</div>
                 </div>
             </div>
+            <Modal isOpen={isModalUpdateProductOpen} onClose={closeModal} modalTitle="Edit Product" maxWidth="max-w-md">
+                <EditProduct
+                    isModalOpen={setIsModalUpdateProductOpen}
+                    notification={(type, message) => setNotification({ type, message })}
+                    fetchProducts={fetchProducts}
+                    selectedProductId={selectedProductId}
+                    products={product}
+                    productCategories={productCategories}
+                />
+            </Modal>
+            <Modal isOpen={isModalDeleteProductOpen} onClose={closeModal} modalTitle="Confirm Delete" maxWidth="max-w-md">
+                <div className="flex flex-col items-center justify-center gap-3 mb-4">
+                    <MessageCircleWarningIcon size={72} className="text-red-600" />
+                    <p className="text-sm">Apakah anda yakin ingin menghapus produk ini (ID: {selectedProductId})?</p>
+                </div>
+                <div className="flex justify-center gap-3">
+                    <Button
+                        buttonType="neutral"
+                        onClick={() => {
+                            handleDeleteProduct(selectedProductId);
+                            setIsModalDeleteProductOpen(false);
+                        }}
+                    >
+                        Ya
+                    </Button>
+                    <Button buttonType="danger" onClick={() => setIsModalDeleteProductOpen(false)}>
+                        Tidak
+                    </Button>
+                </div>
+            </Modal>
         </MainPage>
     );
 };

@@ -2,6 +2,7 @@
 import Input from "@/components/Input";
 import { useState } from "react";
 import axios from "@/libs/axios";
+import Button from "@/components/Button";
 
 const CreateProduct = ({ isModalOpen, notification, fetchProducts, productCategories }) => {
     const [errors, setErrors] = useState([]);
@@ -16,7 +17,7 @@ const CreateProduct = ({ isModalOpen, notification, fetchProducts, productCatego
         e.preventDefault();
         try {
             const response = await axios.post("/api/products", newProduct);
-            notification(response.data.message);
+            notification("success", response.data.message);
             if (response.status === 201) {
                 // Reset form fields and close modal on success
                 setNewProduct({
@@ -31,9 +32,9 @@ const CreateProduct = ({ isModalOpen, notification, fetchProducts, productCatego
             fetchProducts();
         } catch (error) {
             setErrors(error.response?.data?.errors || ["Something went wrong."]);
+            notification("error", error.response?.data?.message);
         }
     };
-
     return (
         <form>
             <div className="mb-4">
@@ -127,13 +128,10 @@ const CreateProduct = ({ isModalOpen, notification, fetchProducts, productCatego
                     {errors.cost && <p className="text-red-500 text-xs">{errors.cost}</p>}
                 </div>
             </div>
-            <div>
-                <button
-                    onClick={handleCreateProduct}
-                    className="text-white bg-indigo-700 hover:bg-indigo-800 focus:ring-4 focus:outline-none focus:ring-indigo-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
-                >
+            <div className="flex justify-end">
+                <Button buttonType="primary" onClick={handleCreateProduct}>
                     Create
-                </button>
+                </Button>
             </div>
         </form>
     );

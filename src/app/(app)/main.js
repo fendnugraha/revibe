@@ -65,7 +65,7 @@ const MainPage = ({ children, headerTitle }) => {
                     </ul>
                 </div>
             </div>
-            <main className="min-h-[calc(100vh-80px)] overflow-auto bg-gray-100 p-4">{children}</main>
+            <main className="h-[calc(100vh-80px)] overflow-auto bg-gray-100 p-4">{children}</main>
         </>
     );
 };
