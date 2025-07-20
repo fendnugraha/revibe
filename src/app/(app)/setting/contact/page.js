@@ -130,9 +130,9 @@ const Contact = () => {
                                         <span className="block text-xs text-gray-400">{contact.type}</span>
                                     </td>
                                     <td>
-                                        {contact.description}
+                                        {contact.phone_number}
                                         <span className="block text-xs text-gray-400">
-                                            {contact.phone_number} | {contact.address}
+                                            {contact.description} | {contact.address}
                                         </span>
                                     </td>
                                     <td className="text-center">

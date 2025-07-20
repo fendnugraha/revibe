@@ -1,0 +1,26 @@
+const StatusBadge = ({ status }) => {
+    let style = "bg-green-100 text-green-800";
+
+    switch (status) {
+        case "Pending":
+            style = "bg-yellow-100 text-slate-800";
+            break;
+        case "In Progress":
+            style = "bg-blue-100 text-blue-800";
+            break;
+        case "Completed":
+            style = "bg-green-100 text-green-800";
+            break;
+        case "Cancelled":
+            style = "bg-red-100 text-red-800";
+            break;
+        case "Rejected":
+            style = "bg-slate-800 text-white";
+            break;
+        default:
+            style = "bg-gray-100 text-gray-800";
+    }
+    return <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${style}`}>{status}</span>;
+};
+
+export default StatusBadge;

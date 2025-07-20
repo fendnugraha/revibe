@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import LoginLink from "./LoginLink";
 
 export default function Home() {
     return (
@@ -10,9 +11,7 @@ export default function Home() {
                     <Image src="/revibe-logo.png" alt="Revibe Logo" width={100} height={24} priority />
                 </div>
                 <div>
-                    <Link href="/login">
-                        <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer">Login</button>
-                    </Link>
+                    <LoginLink />
                 </div>
             </header>
 
