@@ -1,5 +1,5 @@
 "use client";
-import { ArrowLeftRightIcon, ChartAreaIcon, CogIcon, DollarSignIcon, LayoutDashboardIcon, Menu, PowerIcon, StoreIcon } from "lucide-react";
+import { ArrowLeftRightIcon, ChartAreaIcon, CogIcon, DollarSignIcon, LayoutDashboardIcon, Menu, PowerIcon, ScaleIcon, StoreIcon } from "lucide-react";
 import { useState } from "react";
 import NavLink from "@/components/NavLink";
 import { usePathname } from "next/navigation";
@@ -32,7 +32,7 @@ const Navigation = ({ user }) => {
                 {/* Middle Menu */}
                 <div className="">
                     <div className="bg-white border border-slate-200 rounded-3xl drop-shadow-xs">
-                        <ul className="space-y-2 py-4">
+                        <ul className="py-4">
                             <li>
                                 <NavLink href="/dashboard" active={pathName.startsWith("/dashboard")}>
                                     <span className="w-16 h-14 flex items-center justify-center flex-shrink-0 text-slate-500">
@@ -102,6 +102,18 @@ const Navigation = ({ user }) => {
                                                 }`}
                                             >
                                                 Summary
+                                            </span>
+                                        </NavLink>
+                                        <NavLink href="/report" active={pathName.startsWith("/report")}>
+                                            <span className="w-16 h-14 flex items-center justify-center flex-shrink-0 text-slate-500">
+                                                <ScaleIcon size={20} className="" />
+                                            </span>
+                                            <span
+                                                className={`text-sm transition-all duration-300 origin-left ${
+                                                    isMenuOpen ? "opacity-100 scale-100" : "opacity-0 scale-95"
+                                                }`}
+                                            >
+                                                Report
                                             </span>
                                         </NavLink>
                                     </li>

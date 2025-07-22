@@ -112,7 +112,9 @@ const MainPage = ({ children, headerTitle }) => {
                     </ul>
                 </div>
             </div>
-            <main className="h-[calc(100vh-80px)] overflow-auto">{children}</main>
+            <main className="h-[calc(100vh-80px)] overflow-auto">
+                <div className="py-4 sm:py-8 px-4 sm:px-12 mb-28 sm:mb-0">{children}</div>
+            </main>
         </>
     );
 };

@@ -1,6 +1,6 @@
 const Button = ({ children, buttonType = "primary", className, ...props }) => {
     const buttonTypes = {
-        primary: "bg-blue-500 hover:bg-blue-400 text-white",
+        primary: "bg-red-500 hover:bg-red-400 text-white",
         secondary: "bg-gray-500 hover:bg-gray-400 text-white",
         danger: "bg-red-500 hover:bg-red-400 text-white",
         warning: "bg-yellow-500 hover:bg-yellow-400 text-white",
