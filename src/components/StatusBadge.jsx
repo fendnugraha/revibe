@@ -17,6 +17,9 @@ const StatusBadge = ({ status }) => {
         case "Rejected":
             style = "bg-slate-800 text-white";
             break;
+        case "Finished":
+            style = "bg-blue-100 text-blue-800";
+            break;
         default:
             style = "bg-gray-100 text-gray-800";
     }

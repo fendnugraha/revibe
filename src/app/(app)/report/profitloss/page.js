@@ -60,7 +60,7 @@ const ProfitLoss = () => {
 
         return formatted;
     };
-
+    console.log(profitLoss);
     return (
         <MainPage
             headerTitle={
