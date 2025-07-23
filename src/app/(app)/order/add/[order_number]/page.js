@@ -5,7 +5,8 @@ import Modal from "@/components/Modal";
 import Notification from "@/components/Notification";
 import axios from "@/libs/axios";
 import formatNumber from "@/libs/formatNumber";
-import { BoxesIcon, LoaderCircleIcon, MinusIcon, PlusIcon, Trash2Icon } from "lucide-react";
+import { BoxesIcon, CheckCircle, LoaderCircleIcon, MinusIcon, PlusIcon, Trash2Icon } from "lucide-react";
+import Link from "next/link";
 import { use, useCallback, useEffect, useState } from "react";
 
 const useDebounce = (value, delay) => {
@@ -38,6 +39,7 @@ const AddPartsReplacement = ({ params }) => {
     const debouncedSearch = useDebounce(search, 500); // Apply debounce with 500ms delay
     const [part, setPart] = useState([]);
     const [totalPrice, setTotalPrice] = useState(0);
+    const [isPartsAdded, setIsPartsAdded] = useState(false);
 
     const closeModal = () => {
         setIsModalCheckOutOpen(false);
@@ -148,6 +150,7 @@ const AddPartsReplacement = ({ params }) => {
             setNotification({ type: "success", message: response.data.message });
             handleClearPart();
             setIsModalCheckOutOpen(false);
+            setIsPartsAdded(true);
         } catch (error) {
             setNotification({ type: "error", message: error.response?.data?.message || "Something went wrong." });
         } finally {
@@ -165,6 +168,19 @@ const AddPartsReplacement = ({ params }) => {
         >
             {notification.message && (
                 <Notification type={notification.type} notification={notification.message} onClose={() => setNotification({ type: "", message: "" })} />
+            )}
+            {isPartsAdded && (
+                <div className="fixed top-0 left-0 w-full h-full flex flex-col gap-4 items-center justify-center bg-black/20 backdrop-blur-sm z-50">
+                    <CheckCircle size={150} className="text-green-500" />
+                    <div>
+                        <Link className="hover:underline mr-4" href={`/order/detail/${order_number}`}>
+                            Kembali
+                        </Link>
+                        <button className="hover:underline cursor-pointer" onClick={() => setIsPartsAdded(false)}>
+                            Tambah Lagi
+                        </button>
+                    </div>
+                </div>
             )}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 h-[calc(100vh-140px)] p-4">
                 <div className="sm:col-span-2">

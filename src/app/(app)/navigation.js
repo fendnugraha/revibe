@@ -1,5 +1,16 @@
 "use client";
-import { ArrowLeftRightIcon, ChartAreaIcon, CogIcon, DollarSignIcon, LayoutDashboardIcon, Menu, PowerIcon, ScaleIcon, StoreIcon } from "lucide-react";
+import {
+    ArrowLeftRightIcon,
+    BoxesIcon,
+    ChartAreaIcon,
+    CogIcon,
+    DollarSignIcon,
+    LayoutDashboardIcon,
+    Menu,
+    PowerIcon,
+    ScaleIcon,
+    StoreIcon,
+} from "lucide-react";
 import { useState } from "react";
 import NavLink from "@/components/NavLink";
 import { usePathname } from "next/navigation";
@@ -62,16 +73,16 @@ const Navigation = ({ user }) => {
                                 </NavLink>
                             </li>
                             <li>
-                                <NavLink href="/store" active={pathName.startsWith("/store")}>
+                                <NavLink href="/inventory" active={pathName.startsWith("/inventory")}>
                                     <span className="w-16 h-14 flex items-center justify-center flex-shrink-0 text-slate-500">
-                                        <StoreIcon size={20} className="" />
+                                        <BoxesIcon size={20} className="" />
                                     </span>
                                     <span
                                         className={`text-sm transition-all duration-300 origin-left ${
                                             isMenuOpen ? "opacity-100 scale-100" : "opacity-0 scale-95"
                                         }`}
                                     >
-                                        Store
+                                        Inventory
                                     </span>
                                 </NavLink>
                             </li>

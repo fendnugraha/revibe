@@ -13,6 +13,7 @@ const CreatePaymentFrom = ({ isModalOpen, notification, fetchOrder, totalPrice, 
     });
     const [accounts, setAccounts] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [errors, setErrors] = useState([]);
 
     const fetchAccountByIds = useCallback(
         async ({ account_ids }) => {
@@ -43,6 +44,7 @@ const CreatePaymentFrom = ({ isModalOpen, notification, fetchOrder, totalPrice, 
             setFormData({ date_issued: today, paymentMethod: "cash", paymentAccountID: "", order_number: order_number });
         } catch (error) {
             console.error("Error updating order status:", error);
+            setErrors(error.response?.data?.errors || ["Something went wrong."]);
             notification("error", error.response.data.message);
         } finally {
             setLoading(false);
@@ -64,7 +66,7 @@ const CreatePaymentFrom = ({ isModalOpen, notification, fetchOrder, totalPrice, 
                     <button
                         className={`${
                             formData.paymentMethod === "cash" ? "bg-indigo-600 text-white" : "text-white/50"
-                        } py-0.5 px-3 cursor-pointer disabled:bg-slate-300 disabled:cursor-wait rounded-xl`}
+                        } py-0.5 px-3 cursor-pointer disabled:cursor-wait rounded-xl`}
                         disabled={loading}
                         onClick={() => setFormData({ ...formData, paymentMethod: "cash", paymentAccountID: "" })}
                     >
@@ -73,7 +75,7 @@ const CreatePaymentFrom = ({ isModalOpen, notification, fetchOrder, totalPrice, 
                     <button
                         className={`${
                             formData.paymentMethod === "credit" ? "bg-indigo-600 text-white" : "text-white/50"
-                        } text-white py-0.5 px-3 cursor-pointer disabled:bg-slate-300 disabled:cursor-wait rounded-xl`}
+                        } text-white py-0.5 px-3 cursor-pointer disabled:cursor-wait rounded-xl`}
                         disabled={loading}
                         onClick={() => setFormData({ ...formData, paymentMethod: "credit", paymentAccountID: 7 })}
                     >
@@ -88,6 +90,7 @@ const CreatePaymentFrom = ({ isModalOpen, notification, fetchOrder, totalPrice, 
                             value={formData.paymentAccountID}
                             onChange={(e) => setFormData({ ...formData, paymentAccountID: e.target.value })}
                             disabled={loading || formData.paymentMethod === "credit"}
+                            required
                         >
                             <option value="">Pilih Account Pembayaran</option>
                             {accounts?.map((account) => (
@@ -102,8 +105,8 @@ const CreatePaymentFrom = ({ isModalOpen, notification, fetchOrder, totalPrice, 
             <div>
                 <h1 className="text-lg font-bold mb-4">Total: {formatNumber(totalPrice)}</h1>
             </div>
-            <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 cursor-pointer" disabled={loading} onClick={handlePayment}>
-                {loading ? "Loading..." : "Bayar"}
+            <button className="px-4 py-2 bg-red-500 text-white rounded-xl hover:bg-red-600 cursor-pointer" disabled={loading} onClick={handlePayment}>
+                {loading ? "Loading..." : "Selesaikan"}
             </button>
         </>
     );

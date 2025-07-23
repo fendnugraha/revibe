@@ -4,7 +4,7 @@ const PartsTable = ({ parts, totalPrice }) => {
     return (
         <>
             <div className="overflow-x-auto">
-                <table className="w-full text-sm table">
+                <table className="w-full text-xs table">
                     <thead>
                         <tr>
                             <th className="">Nama Part</th>
