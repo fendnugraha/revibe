@@ -6,7 +6,7 @@ const StatusBadge = ({ status }) => {
             style = "bg-yellow-100 text-slate-800";
             break;
         case "In Progress":
-            style = "bg-blue-100 text-blue-800";
+            style = "bg-amber-100 text-amber-800";
             break;
         case "Completed":
             style = "bg-green-100 text-green-800";
