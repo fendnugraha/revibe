@@ -102,7 +102,7 @@ const OrderDetail = ({ params }) => {
                                 <td className="font-bold p-1">Status</td>
                                 <td>:</td>
                                 <td>
-                                    <StatusBadge status={order.status} />
+                                    <StatusBadge status={order.status} /> <span className="text-slate-400 text-xs">({formatDateTime(order.updated_at)})</span>
                                 </td>
                             </tr>
                             <tr>
@@ -125,7 +125,7 @@ const OrderDetail = ({ params }) => {
                                                 disabled={
                                                     order.status === "Finished" ||
                                                     order.status === "Completed" ||
-                                                    order.status === "Cancelled" ||
+                                                    order.status === "Canceled" ||
                                                     order.status === "Rejected" ||
                                                     isLoading
                                                 }
@@ -137,12 +137,12 @@ const OrderDetail = ({ params }) => {
                                                 {order.status !== "In Progress" ? (
                                                     <>
                                                         <option value="In Progress">Proses</option>
-                                                        <option value="Rejected">Ditolak</option>
+                                                        <option value="Rejected">Tolak</option>
                                                     </>
                                                 ) : (
                                                     <>
-                                                        <option value="Finished">Selesai</option>
-                                                        <option value="Cancelled">Dibatalkan</option>
+                                                        <option value="Take Over">Ambil Alih</option>
+                                                        <option value="Canceled">Batalkan</option>
                                                     </>
                                                 )}
                                             </select>

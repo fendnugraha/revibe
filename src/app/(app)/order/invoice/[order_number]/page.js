@@ -81,13 +81,13 @@ const OrderInvoice = ({ params }) => {
                 <div className="grid grid-cols-2 mb-8">
                     <div>
                         <h1 className="font-bold text-sm">Ditujukan Kepada</h1>
-                        <h1 className="text-red-500 text-sm font-bold">{order?.contact?.name}</h1>
+                        <h1 className="text-red-500 text-sm font-bold">{order?.contact?.name?.toUpperCase()}</h1>
                         <h1 className="text-slate-500 text-sm">{maskPhoneNumber(order?.contact?.address)}</h1>
                         <h1 className="text-slate-500 text-sm">{maskPhoneNumber(order?.contact?.phone_number)}</h1>
                     </div>
                     <div>
-                        <h1 className="font-bold text-sm">Type Perangkat</h1>
-                        <h1 className="text-slate-500 text-sm font-bold">{order?.phone_type?.toUpperCase()}</h1>
+                        <h1 className="font-bold text-sm">Device (Phone)</h1>
+                        <h1 className="text-red-500 text-lg font-bold">{order?.phone_type?.toUpperCase()}</h1>
                     </div>
                 </div>
                 <div>
@@ -120,7 +120,7 @@ const OrderInvoice = ({ params }) => {
                     <div className="flex justify-between mb-8">
                         <div>
                             <h1 className="font-bold text-sm">Metode Pembayaran</h1>
-                            <h1 className="text-slate-500 text-sm">Tunai/Transfer</h1>
+                            <h1 className="text-slate-500 text-sm">{order?.payment_method}</h1>
                         </div>
                         <div>
                             <h1 className="font-bold text-right">Catatan</h1>

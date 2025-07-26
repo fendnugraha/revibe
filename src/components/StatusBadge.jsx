@@ -11,7 +11,7 @@ const StatusBadge = ({ status }) => {
         case "Completed":
             style = "bg-green-100 text-green-800";
             break;
-        case "Cancelled":
+        case "Canceled":
             style = "bg-red-100 text-red-800";
             break;
         case "Rejected":

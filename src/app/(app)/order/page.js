@@ -10,15 +10,12 @@ import axios from "@/libs/axios";
 import Link from "next/link";
 import StatusBadge from "@/components/StatusBadge";
 import OrderStatus from "./components/OrderStatus";
-import { QRCodeSVG } from "qrcode.react";
 
 const Order = () => {
     const [orders, setOrders] = useState([]);
     const [search, setSearch] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const [printQrOrder, setPrintQrOrder] = useState(null);
-    const [shouldPrint, setShouldPrint] = useState(false);
 
     const [isLoading, setIsLoading] = useState(false);
     const [errors, setErrors] = useState([]);
@@ -54,23 +51,6 @@ const Order = () => {
     useEffect(() => {
         fetchOrders();
     }, [fetchOrders]);
-
-    const handlePrintQR = (orderNumber) => {
-        setPrintQrOrder(orderNumber);
-        setShouldPrint(true);
-    };
-
-    useEffect(() => {
-        if (shouldPrint) {
-            const timer = setTimeout(() => {
-                window.print();
-                setShouldPrint(false);
-                setPrintQrOrder(null);
-            }, 300); // beri waktu render QR dulu (300ms cukup aman)
-
-            return () => clearTimeout(timer);
-        }
-    }, [shouldPrint]);
 
     return (
         <MainPage headerTitle="Service Order">
@@ -121,33 +101,18 @@ const Order = () => {
                                             <StatusBadge status={order.status} />
                                         </td>
                                         <td className="text-center">
-                                            {printQrOrder === order.order_number && (
-                                                <div className="p-4 print:block hidden">
-                                                    <QRCodeSVG
-                                                        value={`${typeof window !== "undefined" ? window.location.origin : ""}/order/invoice/${
-                                                            order.order_number
-                                                        }`}
-                                                        size={128}
-                                                    />
-                                                </div>
-                                            )}
-
-                                            {/* Tombol cetak QR */}
-                                            <button
-                                                onClick={() => {
-                                                    handlePrintQR(order.order_number);
-                                                    console.log(printQrOrder);
-                                                }}
+                                            <Link
+                                                href={`/order/order_invoice/${order.order_number}`}
                                                 className="text-slate-500 hover:text-slate-600 cursor-pointer no-print"
                                             >
                                                 Cetak QR
-                                            </button>
+                                            </Link>
                                         </td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="4" className="text-center">
+                                    <td colSpan="5" className="text-center">
                                         No data found
                                     </td>
                                 </tr>

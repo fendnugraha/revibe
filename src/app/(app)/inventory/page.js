@@ -12,6 +12,8 @@ import { useAuth } from "@/libs/auth";
 import axios from "@/libs/axios";
 import formatDateTime from "@/libs/formatDateTime";
 import formatNumber from "@/libs/formatNumber";
+import ProductTable from "./components/ProductTable";
+import { set } from "date-fns";
 
 const getCurrentDate = () => {
     const today = new Date();
@@ -25,6 +27,7 @@ const Inventory = () => {
     const { user } = useAuth({ middleware: "auth" });
 
     const warehouse = user?.role?.warehouse_id;
+    const warehouseName = user?.role?.warehouse?.name;
     const userRole = user?.role?.role;
     const [transactions, setTransactions] = useState([]);
     const [notification, setNotification] = useState({
@@ -82,7 +85,7 @@ const Inventory = () => {
             {notification.message && (
                 <Notification type={notification.type} notification={notification.message} onClose={() => setNotification({ type: "", message: "" })} />
             )}
-            <div className="bg-white shadow-sm sm:rounded-3xl ">
+            <div className="bg-white shadow-sm sm:rounded-3xl mb-4">
                 <div className="p-4 flex justify-between sm:flex-row flex-col items-start">
                     <h1 className="text-2xl font-bold mb-4">
                         Transaksi Barang
@@ -95,7 +98,7 @@ const Inventory = () => {
                             <PlusCircleIcon className="w-4 h-4 inline" /> Penjualan
                         </Link>
                         {userRole === "Administrator" && (
-                            <Link href="/inventory/sales" className="btn-primary text-sm font-normal">
+                            <Link href="/inventory/purchase" className="btn-primary text-sm font-normal">
                                 <PlusCircleIcon className="w-4 h-4 inline" /> Pembelian
                             </Link>
                         )}
@@ -105,9 +108,9 @@ const Inventory = () => {
                                         </button> */}
                         <button
                             onClick={() => setIsModalFilterJournalOpen(true)}
-                            className="bg-white font-bold p-2 rounded-lg border border-gray-300 hover:border-gray-400"
+                            className="bg-white font-bold p-3 rounded-lg border border-gray-300 hover:border-gray-400"
                         >
-                            <FilterIcon className="size-5" />
+                            <FilterIcon className="size-4" />
                         </button>
                         <Modal isOpen={isModalFilterJournalOpen} onClose={closeModal} modalTitle="Filter Tanggal" maxWidth="max-w-md">
                             {userRole === "Administrator" && (
@@ -181,12 +184,11 @@ const Inventory = () => {
                     <table className="table w-full text-xs">
                         <thead>
                             <tr>
-                                <th>Type</th>
-                                <th>Product</th>
-                                <th>Qty</th>
-                                <th>Jual</th>
-                                <th>Modal</th>
-                                <th>Action</th>
+                                <th>Tanggal</th>
+                                <th>Invoice</th>
+                                <th>Total</th>
+                                <th>Cabang</th>
+                                <th>Status</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -203,8 +205,8 @@ const Inventory = () => {
                                     </td>
                                 </tr>
                             ) : (
-                                transactions.data?.map((transaction) => (
-                                    <tr key={transaction.id}>
+                                transactions.data?.map((transaction, index) => (
+                                    <tr key={index}>
                                         <td className="text-center">
                                             {transaction.transaction_type === "Purchase" ? (
                                                 <ArrowBigDown size={24} className="text-green-500 inline" />
@@ -214,28 +216,14 @@ const Inventory = () => {
                                             <span className="">{transaction.transaction_type}</span>
                                         </td>
                                         <td className="font-bold">
-                                            <span className="text-xs font-normal block text-slate-500">
-                                                {formatDateTime(transaction.created_at)} {transaction.invoice}
-                                            </span>
-
-                                            {transaction.product.name}
+                                            <span className="text-xs font-normal block text-slate-500">{formatDateTime(transaction.date_issued)}</span>
+                                            <Link className="hover:underline" href={`/inventory/detail/${transaction.invoice}`}>
+                                                {transaction.invoice}
+                                            </Link>
                                         </td>
-                                        <td className="text-center">
-                                            {formatNumber(transaction.quantity < 0 ? transaction.quantity * -1 : transaction.quantity)}
-                                        </td>
-                                        <td className="text-end">{formatNumber(transaction.price)}</td>
-                                        <td className="text-end">{formatNumber(transaction.cost)}</td>
-                                        <td className="text-center">
-                                            <button
-                                                onClick={() => {
-                                                    setSelectedTrxId(transaction.id);
-                                                    setIsModalDeleteTrxOpen(true);
-                                                }}
-                                                disabled
-                                            >
-                                                <XCircleIcon className="w-4 h-4 text-red-500 inline hover:scale-125 transition-transform duration-300" />
-                                            </button>
-                                        </td>
+                                        <td className="text-right">{formatNumber(transaction.total_value)}</td>
+                                        <td className="text-end">{transaction.warehouse?.name}</td>
+                                        <td className="text-center">{transaction.status}</td>
                                     </tr>
                                 ))
                             )}
@@ -244,6 +232,7 @@ const Inventory = () => {
                 </div>
                 <div className="px-4">{transactions.last_page > 1 && <Paginator links={transactions} handleChangePage={handleChangePage} />}</div>
             </div>
+            <ProductTable warehouse={warehouse} warehouseName={warehouseName} notification={(type, message) => setNotification(type, message)} />
         </MainPage>
     );
 };
