@@ -9,6 +9,7 @@ import {
     LoaderIcon,
     MenuIcon,
     StoreIcon,
+    User2Icon,
     XIcon,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -58,10 +59,16 @@ const MainPage = ({ children, headerTitle }) => {
     return (
         <>
             <header className="w-full h-20 flex items-center justify-between px-4 sm:px-12 py-2">
-                <h1 className="text-xl sm:text-2xl font-bold text-slate-700">
+                <h1 className="text-xl sm:text-xl font-bold text-slate-700">
                     {headerTitle}
-                    <span className="text-xs font-normal p-0 block">{getCurrentDate()}</span>
+                    <span className="text-xs font-normal p-0 block">
+                        {userWarehouseName}, {getCurrentDate()}
+                    </span>
                 </h1>
+                <div className="flex items-center gap-2 border border-red-300 text-red-500 px-4 py-1 rounded-2xl">
+                    <User2Icon size={16} />
+                    <h1>{user.email}</h1>
+                </div>
             </header>
             <div
                 ref={drawerReff}

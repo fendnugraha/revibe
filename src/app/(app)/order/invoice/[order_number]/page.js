@@ -40,7 +40,7 @@ const OrderInvoice = ({ params }) => {
     const maskPhoneNumber = (phoneNumber) => {
         return phoneNumber?.replace(/(\d{3})(\d{3})(\d{4})/, "$1-$2-$3");
     };
-    const totalPrice = order.transaction?.reduce((total, part) => total + part.price * -part.quantity, 0);
+    const totalPrice = order.transaction?.stock_movements?.reduce((total, part) => total + part.price * -part.quantity, 0);
     console.log(order);
     return (
         <MainPage
@@ -101,9 +101,11 @@ const OrderInvoice = ({ params }) => {
                             </tr>
                         </thead>
                         <tbody>
-                            {order?.transaction?.map((part) => (
+                            {order?.transaction?.stock_movements?.map((part) => (
                                 <tr className="border border-slate-300" key={part.id}>
-                                    <td className="p-1.5 border border-slate-300">{part.product?.name}</td>
+                                    <td className="p-1.5 border border-slate-300">
+                                        {part.product?.code} - {part.product?.name}
+                                    </td>
                                     <td className="p-1.5 border border-slate-300 text-center">{formatNumber(-part.quantity)}</td>
                                     <td className="p-1.5 border border-slate-300 text-end">{formatNumber(part.price)}</td>
                                     <td className="p-1.5 border border-slate-300 text-end">{formatNumber(part.price * -part.quantity)}</td>
@@ -120,7 +122,9 @@ const OrderInvoice = ({ params }) => {
                     <div className="flex justify-between mb-8">
                         <div>
                             <h1 className="font-bold text-sm">Metode Pembayaran</h1>
-                            <h1 className="text-slate-500 text-sm">{order?.payment_method}</h1>
+                            <h1 className="text-slate-500 text-sm mb-2">{order?.transaction?.payment_method}</h1>
+                            <h1 className="font-bold text-sm">Tanggal Selesai</h1>
+                            <h1 className="text-slate-500 text-sm">{formatLongDate(order?.transaction?.updated_at)}</h1>
                         </div>
                         <div>
                             <h1 className="font-bold text-right">Catatan</h1>

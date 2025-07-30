@@ -8,9 +8,10 @@ const CreateProduct = ({ isModalOpen, notification, fetchProducts, productCatego
     const [errors, setErrors] = useState([]);
     const [newProduct, setNewProduct] = useState({
         name: "",
-        category: "",
+        category_id: "",
         price: 0,
         cost: 0,
+        is_service: false,
     });
 
     const handleCreateProduct = async (e) => {
@@ -25,6 +26,7 @@ const CreateProduct = ({ isModalOpen, notification, fetchProducts, productCatego
                     category: "",
                     price: 0,
                     cost: 0,
+                    is_service: false,
                 });
             }
             isModalOpen(false);
@@ -67,22 +69,22 @@ const CreateProduct = ({ isModalOpen, notification, fetchProducts, productCatego
                     className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ${
                         errors.category ? "border-red-500" : ""
                     }`}
-                    value={newProduct.category}
+                    value={newProduct.category_id}
                     onChange={(e) =>
                         setNewProduct({
                             ...newProduct,
-                            category: e.target.value,
+                            category_id: e.target.value,
                         })
                     }
                 >
                     <option value="">Select category</option>
                     {productCategories.map((category) => (
-                        <option key={category.id} value={category.name}>
+                        <option key={category.id} value={category.id}>
                             {category.name}
                         </option>
                     ))}
                 </select>
-                {errors.category && <p className="text-red-500 text-xs">{errors.category}</p>}
+                {errors.category_id && <p className="text-red-500 text-xs">{errors.category_id}</p>}
             </div>
             <div className="flex gap-4 mb-4">
                 <div>
@@ -127,6 +129,23 @@ const CreateProduct = ({ isModalOpen, notification, fetchProducts, productCatego
                     />
                     {errors.cost && <p className="text-red-500 text-xs">{errors.cost}</p>}
                 </div>
+            </div>
+            <div className="flex items-center mb-4">
+                <input
+                    type="checkbox"
+                    id="is_service"
+                    checked={newProduct.is_service}
+                    onChange={(e) =>
+                        setNewProduct({
+                            ...newProduct,
+                            is_service: e.target.checked,
+                        })
+                    }
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <label htmlFor="is_service" className="ml-2 text-sm font-medium text-gray-900">
+                    Produk Jasa
+                </label>
             </div>
             <div className="flex justify-end">
                 <Button buttonType="primary" onClick={handleCreateProduct}>

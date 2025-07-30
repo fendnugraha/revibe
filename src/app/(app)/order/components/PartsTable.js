@@ -14,8 +14,8 @@ const PartsTable = ({ parts, totalPrice }) => {
                         </tr>
                     </thead>
                     <tbody>
-                        {parts.length > 0 ? (
-                            parts?.map((part, index) => (
+                        {parts?.stock_movements?.length > 0 ? (
+                            parts?.stock_movements?.map((part, index) => (
                                 <tr key={index}>
                                     <td className="">{part.product?.name}</td>
                                     <td className="text-right">{formatNumber(part.price)}</td>
@@ -31,7 +31,7 @@ const PartsTable = ({ parts, totalPrice }) => {
                             </tr>
                         )}
                     </tbody>
-                    {parts.length > 0 && (
+                    {parts?.stock_movements?.length > 0 && (
                         <tfoot>
                             <tr>
                                 <th></th>

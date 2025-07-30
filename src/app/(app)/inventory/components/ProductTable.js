@@ -10,6 +10,8 @@ import Pagination from "@/components/PaginateList";
 import Link from "next/link";
 import exportToExcel from "@/libs/exportToExcel";
 import formatDateTime from "@/libs/formatDateTime";
+import CreateStockAdjustment from "./CreateStockAdjustment";
+import CreateReversal from "./CreateReversal";
 
 const getCurrentDate = () => {
     const today = new Date();
@@ -19,7 +21,7 @@ const getCurrentDate = () => {
     return `${year}-${month}-${day}`;
 };
 
-const ProductTable = ({ warehouse, warehouseName, notification }) => {
+const ProductTable = ({ warehouse, warehouses, warehouseName, notification }) => {
     const [search, setSearch] = useState("");
     const [endDate, setEndDate] = useState(getCurrentDate());
     const [errors, setErrors] = useState([]); // Store validation errors
@@ -74,7 +76,7 @@ const ProductTable = ({ warehouse, warehouseName, notification }) => {
     const summarizeTotal = (warehouseStock) => {
         let total = 0;
         warehouseStock.forEach((item) => {
-            total += item.cost * item.transactions_sum_quantity;
+            total += item.current_cost * item.current_stock;
         });
         return total;
     };
@@ -82,7 +84,7 @@ const ProductTable = ({ warehouse, warehouseName, notification }) => {
     const exportStockToExcel = () => {
         const headers = [
             { key: "name", label: "Nama Barang" },
-            { key: "transactions_sum_quantity", label: "Qty" },
+            { key: "stock_movements_sum_quantity", label: "Qty" },
             { key: "cost", label: "Harga" },
             { key: "total", label: "Total" },
         ];
@@ -90,13 +92,13 @@ const ProductTable = ({ warehouse, warehouseName, notification }) => {
         const data = [
             ...warehouseStock.map((item) => ({
                 name: item.name,
-                transactions_sum_quantity: formatNumber(item.transactions_sum_quantity),
-                cost: formatNumber(item.cost),
-                total: formatNumber(item.cost * item.transactions_sum_quantity),
+                stock_movements_sum_quantity: formatNumber(item.stock_movements_sum_quantity),
+                cost: formatNumber(item.current_cost),
+                total: formatNumber(item.current_cost * item.stock_movements_sum_quantity),
             })),
             {
                 name: "Total",
-                transactions_sum_quantity: "",
+                stock_movements_sum_quantity: "",
                 cost: "",
                 total: formatNumber(summarizeTotal(warehouseStock)),
             },
@@ -191,12 +193,12 @@ const ProductTable = ({ warehouse, warehouseName, notification }) => {
                             <tr key={index} className="text-xs">
                                 <td className="text-start w-1/2">
                                     <Link className="hover:underline" href={`/setting/product/history/${item.id}`}>
-                                        {item.name}
+                                        {item.code} - {item.name}
                                     </Link>
                                 </td>
                                 <td className="text-end">{formatNumber(item.current_stock)}</td>
-                                <td className="text-end">{formatNumber(item.cost)}</td>
-                                <td className="text-end">{formatNumber(item.cost * item.current_stock)}</td>
+                                <td className="text-end">{formatNumber(item.current_cost)}</td>
+                                <td className="text-end font-semibold">{formatNumber(item.current_cost * item.current_stock)}</td>
                                 <td className="flex justify-center gap-2">
                                     <button
                                         onClick={() => {
@@ -240,6 +242,28 @@ const ProductTable = ({ warehouse, warehouseName, notification }) => {
                     />
                 )}
             </div>
+            <Modal isOpen={isModalAdjustmentOpen} onClose={closeModal} modalTitle="Stock Adjustment" maxWidth="max-w-md">
+                <CreateStockAdjustment
+                    isModalOpen={setIsModalAdjustmentOpen}
+                    product={findProduct}
+                    warehouse={warehouse}
+                    warehouses={warehouses}
+                    notification={notification}
+                    date={getCurrentDate()}
+                    fetchWarehouseStock={fetchWarehouseStock}
+                />
+            </Modal>
+            <Modal isOpen={isModalReversalOpen} onClose={closeModal} modalTitle="Reversal" maxWidth="max-w-md">
+                <CreateReversal
+                    isModalOpen={setIsModalReversalOpen}
+                    product={findProduct}
+                    warehouse={warehouse}
+                    warehouses={warehouses}
+                    notification={notification}
+                    date={getCurrentDate()}
+                    fetchWarehouseStock={fetchWarehouseStock}
+                />
+            </Modal>
         </>
     );
 };

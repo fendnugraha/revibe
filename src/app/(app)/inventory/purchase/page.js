@@ -100,7 +100,7 @@ const PurchaseOrder = () => {
 
     const handleUpdatePrice = (product, newPrice) => {
         setCartPo((prevpart) => {
-            return prevpart.map((item) => (item.id === product.id ? { ...item, price: newPrice } : item));
+            return prevpart.map((item) => (item.id === product.id ? { ...item, current_cost: newPrice } : item));
         });
     };
 
@@ -124,8 +124,8 @@ const PurchaseOrder = () => {
 
     // Calculate total price
     const calculateTotalPrice = useCallback(() => {
-        return cartPo.reduce((total, item) => total + item.price * item.quantity, 0);
-        // return cartPo.reduce((total, item) => total + item.price * item.quantity, 0);
+        return cartPo.reduce((total, item) => total + item.current_cost * item.quantity, 0);
+        // return cartPo.reduce((total, item) => total + item.cost * item.quantity, 0);
     }, [cartPo]);
 
     const calculateTotalQuantity = useCallback(() => {
@@ -183,7 +183,6 @@ const PurchaseOrder = () => {
         shipping_cost: 0,
         contact_id: 1,
     });
-    console.log(cartPo);
 
     const handleCheckOut = async () => {
         setLoading(true);
@@ -197,6 +196,7 @@ const PurchaseOrder = () => {
                 paymentAccountID: "",
                 discount: 0,
                 shipping_cost: 0,
+                contact_id: 1,
             });
             setIsModalCheckOutOpen(false);
         } catch (error) {
@@ -240,18 +240,18 @@ const PurchaseOrder = () => {
                             {cartPo.length > 0 ? (
                                 cartPo.map((item) => (
                                     <div key={item.id} className="p-2 rounded-2xl border border-slate-200 mb-2 flex items-center gap-3">
-                                        <div className="size-[50px] flex-shrink-0 bg-slate-300 rounded-lg flex justify-center items-center">
+                                        <div className="size-[40px] flex-shrink-0 bg-slate-300 rounded-lg flex justify-center items-center">
                                             <BoxesIcon size={18} className="text-slate-500" />
                                         </div>
                                         <div className="flex flex-col justify-between h-[50px] w-full">
                                             <h1 className="text-xs font-bold truncate">{item.name?.toUpperCase()}</h1>
                                             <div className="flex gap-4 w-full items-center">
                                                 <div className="flex items-center justify-between w-[72px]">
-                                                    <button>
+                                                    <button className="border border-gray-300 rounded-full active:border-red-500">
                                                         <PlusIcon size={18} className="text-green-500" onClick={() => handleIncrementQuantity(item)} />
                                                     </button>
                                                     <span className="mx-2 text-sm">{item.quantity}</span>
-                                                    <button>
+                                                    <button className="border border-gray-300 rounded-full active:border-red-500">
                                                         <MinusIcon size={18} className="text-red-500" onClick={() => handleDecrementQuantity(item)} />
                                                     </button>
                                                 </div>
@@ -260,7 +260,7 @@ const PurchaseOrder = () => {
                                                     min="0"
                                                     step="100"
                                                     className=" bg-gray-50 text-xs text-end text-gray-900 w-36 rounded-full outline-1 outline-gray-300 focus:outline-orange-500/50 focus:outline-2 block px-4 py-1"
-                                                    value={item.price}
+                                                    value={item.current_cost}
                                                     onChange={(e) => handleUpdatePrice(item, e.target.value)}
                                                 />
                                             </div>
@@ -308,110 +308,117 @@ const PurchaseOrder = () => {
                             </button>
                         </div>
                     </div>
-                    <Modal isOpen={isModalCheckOutOpen} onClose={closeModal} maxWidth={"max-w-xl"} modalTitle="Checkout" bgColor="bg-white">
-                        <div>
-                            <div className="mb-4">
-                                <label className="block mb-1 text-sm font-medium text-gray-900">Tanggal</label>
-                                <input
-                                    type="datetime-local"
-                                    className="w-full border bg-white border-slate-200 px-4 py-2 rounded-xl"
-                                    value={formData.date_issued}
-                                    onChange={(e) => setFormData({ ...formData, date_issued: e.target.value })}
-                                />
-                            </div>
-                            <div className="mb-4">
-                                <label className="block mb-1 text-sm font-medium text-gray-900">Discount (Rp)</label>
-                                <input
-                                    type="number"
-                                    className="w-full border bg-white border-slate-200 px-4 py-2 rounded-xl"
-                                    value={formData.discount}
-                                    onChange={(e) => setFormData({ ...formData, discount: e.target.value })}
-                                />
-                            </div>
-                            <div className="mb-4">
-                                <label className="block mb-1 text-sm font-medium text-gray-900">Biaya Pengiriman (Rp)</label>
-                                <input
-                                    type="number"
-                                    className="w-full border bg-white border-slate-200 px-4 py-2 rounded-xl"
-                                    value={formData.shipping_cost}
-                                    onChange={(e) => setFormData({ ...formData, shipping_cost: e.target.value })}
-                                />
-                            </div>
-                            <div className="flex bg-indigo-400 w-fit rounded-xl mb-2">
-                                <button
-                                    className={`${
-                                        formData.paymentMethod === "cash" ? "bg-indigo-600 text-white" : "text-white/50"
-                                    } py-0.5 px-3 cursor-pointer disabled:cursor-wait rounded-xl`}
-                                    disabled={loading}
-                                    onClick={() => setFormData({ ...formData, paymentMethod: "cash", paymentAccountID: "" })}
-                                >
-                                    Cash
-                                </button>
-                                <button
-                                    className={`${
-                                        formData.paymentMethod === "credit" ? "bg-indigo-600 text-white" : "text-white/50"
-                                    } text-white py-0.5 px-3 cursor-pointer disabled:cursor-wait rounded-xl`}
-                                    disabled={loading}
-                                    onClick={() => setFormData({ ...formData, paymentMethod: "credit", paymentAccountID: 7 })}
-                                >
-                                    Credit
-                                </button>
+                    <Modal isOpen={isModalCheckOutOpen} onClose={closeModal} maxWidth={"max-w-2xl"} modalTitle="Checkout" bgColor="bg-white">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <div className="mb-4">
+                                    <label className="block mb-1 text-sm font-medium text-gray-900">Tanggal</label>
+                                    <input
+                                        type="datetime-local"
+                                        className="w-full border bg-white border-slate-200 px-4 py-1 rounded-xl"
+                                        value={formData.date_issued}
+                                        onChange={(e) => setFormData({ ...formData, date_issued: e.target.value })}
+                                    />
+                                </div>
+                                <div className="mb-4">
+                                    <label className="block mb-1 text-sm font-medium text-gray-900">Discount (Rp)</label>
+                                    <input
+                                        type="number"
+                                        className="w-full border bg-white border-slate-200 px-4 py-1 rounded-xl"
+                                        value={formData.discount}
+                                        onChange={(e) => setFormData({ ...formData, discount: e.target.value })}
+                                    />
+                                </div>
+                                <div className="mb-4">
+                                    <label className="block mb-1 text-sm font-medium text-gray-900">Biaya Pengiriman (Rp)</label>
+                                    <input
+                                        type="number"
+                                        className="w-full border bg-white border-slate-200 px-4 py-1 rounded-xl"
+                                        value={formData.shipping_cost}
+                                        onChange={(e) => setFormData({ ...formData, shipping_cost: e.target.value })}
+                                    />
+                                </div>
                             </div>
                             <div>
-                                <label className="block mb-1 text-sm font-medium text-gray-900">Account Pembayaran</label>
-                                <select
-                                    className="w-full border bg-white border-slate-200 px-4 py-2 rounded-xl mb-4 disabled:bg-slate-300 disabled:cursor-not-allowed"
-                                    value={formData.paymentAccountID}
-                                    onChange={(e) => setFormData({ ...formData, paymentAccountID: e.target.value })}
-                                    disabled={loading || formData.paymentMethod === "credit"}
-                                    required
-                                >
-                                    <option value="">Pilih Account Pembayaran</option>
-                                    {accounts?.map((account) => (
-                                        <option key={account.id} value={account.id}>
-                                            {account.acc_name}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block mb-1 text-sm font-medium text-gray-900">Supplier</label>
-                                <select
-                                    className="w-full border bg-white border-slate-200 px-4 py-2 rounded-xl mb-4 disabled:bg-slate-300 disabled:cursor-not-allowed"
-                                    value={formData.contact_id}
-                                    onChange={(e) => setFormData({ ...formData, contact_id: e.target.value })}
-                                    disabled={loading}
-                                    required
-                                >
-                                    <option value="">Pilih Supplier</option>
-                                    {contacts?.data?.map((contact) => (
-                                        <option key={contact.id} value={contact.id}>
-                                            {contact.name}
-                                        </option>
-                                    ))}
-                                </select>
+                                <div className="flex bg-indigo-400 w-fit rounded-xl mb-2">
+                                    <button
+                                        className={`${
+                                            formData.paymentMethod === "cash" ? "bg-indigo-600 text-white" : "text-white/50"
+                                        } py-0.5 px-3 cursor-pointer disabled:cursor-wait rounded-xl`}
+                                        disabled={loading}
+                                        onClick={() => setFormData({ ...formData, paymentMethod: "cash", paymentAccountID: "" })}
+                                    >
+                                        Cash
+                                    </button>
+                                    <button
+                                        className={`${
+                                            formData.paymentMethod === "credit" ? "bg-indigo-600 text-white" : "text-white/50"
+                                        } text-white py-0.5 px-3 cursor-pointer disabled:cursor-wait rounded-xl`}
+                                        disabled={loading}
+                                        onClick={() => setFormData({ ...formData, paymentMethod: "credit", paymentAccountID: 7 })}
+                                    >
+                                        Credit
+                                    </button>
+                                </div>
+                                <div>
+                                    <label className="block mb-1 text-sm font-medium text-gray-900">Account Pembayaran</label>
+                                    <select
+                                        className="w-full border bg-white border-slate-200 px-4 py-1 rounded-xl mb-4 disabled:bg-slate-300 disabled:cursor-not-allowed"
+                                        value={formData.paymentAccountID}
+                                        onChange={(e) => setFormData({ ...formData, paymentAccountID: e.target.value })}
+                                        disabled={loading || formData.paymentMethod === "credit"}
+                                        required
+                                    >
+                                        <option value="">Pilih Account Pembayaran</option>
+                                        {accounts?.map((account) => (
+                                            <option key={account.id} value={account.id}>
+                                                {account.acc_name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block mb-1 text-sm font-medium text-gray-900">Supplier</label>
+                                    <select
+                                        className="w-full border bg-white border-slate-200 px-4 py-1 rounded-xl mb-4 disabled:bg-slate-300 disabled:cursor-not-allowed"
+                                        value={formData.contact_id}
+                                        onChange={(e) => setFormData({ ...formData, contact_id: e.target.value })}
+                                        disabled={loading}
+                                        required
+                                    >
+                                        <option value="">Pilih Supplier</option>
+                                        {contacts?.data?.map((contact) => (
+                                            <option key={contact.id} value={contact.id}>
+                                                {contact.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <table className="w-full text-xs h-fit">
+                                    <tbody>
+                                        <tr>
+                                            <td className="font-semibold p-1">Total</td>
+                                            <td className="text-right p-1">Rp {formatNumber(totalPrice)}</td>
+                                        </tr>
+                                        <tr>
+                                            <td className="font-semibold p-1">Discount</td>
+                                            <td className="text-right p-1 text-red-500">Rp {formatNumber(formData.discount)}</td>
+                                        </tr>
+                                        <tr>
+                                            <td className="font-semibold p-1">Biaya Pengiriman</td>
+                                            <td className="text-right p-1">Rp {formatNumber(formData.shipping_cost)}</td>
+                                        </tr>
+                                        <tr className="border-t border-slate-500 border-dashed">
+                                            <td className="font-semibold p-1">Total Pembayaran</td>
+                                            <td className="text-right p-1">
+                                                Rp {formatNumber(totalPrice - formData.discount + Number(formData.shipping_cost))}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
-                        <table className="w-full text-xs">
-                            <tbody>
-                                <tr>
-                                    <td className="font-semibold p-1">Total</td>
-                                    <td className="text-right p-1">Rp {formatNumber(totalPrice)}</td>
-                                </tr>
-                                <tr>
-                                    <td className="font-semibold p-1">Discount</td>
-                                    <td className="text-right p-1 text-red-500">Rp {formatNumber(formData.discount)}</td>
-                                </tr>
-                                <tr>
-                                    <td className="font-semibold p-1">Biaya Pengiriman</td>
-                                    <td className="text-right p-1">Rp {formatNumber(formData.shipping_cost)}</td>
-                                </tr>
-                                <tr className="border-t border-slate-500 border-dashed">
-                                    <td className="font-semibold p-1">Total Pembayaran</td>
-                                    <td className="text-right p-1">Rp {formatNumber(totalPrice - formData.discount + Number(formData.shipping_cost))}</td>
-                                </tr>
-                            </tbody>
-                        </table>
                         <button
                             onClick={handleCheckOut}
                             className="w-full mt-4 bg-indigo-600 hover:bg-indigo-500 text-white py-4 px-6 disabled:bg-slate-300 disabled:cursor-wait rounded-full"

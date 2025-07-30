@@ -59,7 +59,8 @@ const OrderDetail = ({ params }) => {
         }
     };
 
-    const totalPrice = order.transaction?.reduce((total, part) => total + part.price * -part.quantity, 0);
+    console.log(order);
+    const totalPrice = order.transaction?.stock_movements?.reduce((total, part) => total + part.price * -part.quantity, 0);
     return (
         <MainPage
             headerTitle={
@@ -160,7 +161,7 @@ const OrderDetail = ({ params }) => {
                         </tbody>
                     </table>
 
-                    <table className="w-full text-sm">
+                    <table className="w-full text-sm h-fit">
                         <tbody>
                             <tr>
                                 <td className="font-bold p-1 w-60">Nama Pemilik</td>

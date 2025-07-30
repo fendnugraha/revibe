@@ -170,8 +170,9 @@ const AddPartsReplacement = ({ params }) => {
                 <Notification type={notification.type} notification={notification.message} onClose={() => setNotification({ type: "", message: "" })} />
             )}
             {isPartsAdded && (
-                <div className="fixed top-0 left-0 w-full h-full flex flex-col gap-4 items-center justify-center bg-black/20 backdrop-blur-sm z-50">
-                    <CheckCircle size={150} className="text-green-500" />
+                <div className="fixed top-0 left-0 w-full h-full flex flex-col gap-4 items-center justify-center bg-black/20 backdrop-blur-xl z-50">
+                    <CheckCircle size={120} className="text-green-500" />
+                    <h1 className="text-2xl font-bold">Sparepart berhasil ditambahkan</h1>
                     <div>
                         <Link className="hover:underline mr-4" href={`/order/detail/${order_number}`}>
                             Kembali

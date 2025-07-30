@@ -191,11 +191,11 @@ const Product = () => {
                                         <td>
                                             {product.name}
                                             <span className="block text-xs text-slate-400">
-                                                {product.code} {product.category} {formatNumber(product.sold)} terjual
+                                                {product.code} {product.category?.name}
                                             </span>
                                         </td>
                                         <td>{formatNumber(product.price)}</td>
-                                        <td>{formatNumber(product.cost)}</td>
+                                        <td>{formatNumber(product.current_cost)}</td>
                                         <td className="">
                                             <span className="flex gap-2 justify-center">
                                                 <button

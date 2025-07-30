@@ -49,6 +49,19 @@ const Inventory = () => {
         setIsModalDeleteTrxOpen(false);
     };
 
+    const fetchWarehouses = useCallback(async () => {
+        try {
+            const response = await axios.get("/api/warehouse");
+            setWarehouses(response.data.data);
+        } catch (error) {
+            console.log(error);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchWarehouses();
+    }, [fetchWarehouses]);
+
     const fetchTransaction = useCallback(
         async (url = `/api/get-trx-by-warehouse/${selectedWarehouse}/${startDate}/${endDate}`) => {
             setLoading(true);
@@ -90,7 +103,7 @@ const Inventory = () => {
                     <h1 className="text-2xl font-bold mb-4">
                         Transaksi Barang
                         <span className="text-xs block text-slate-500 font-normal">
-                            {warehouses.find((w) => w.id === Number(selectedWarehouse))?.name}, Periode: {startDate} - {endDate}
+                            {warehouses.data?.find((w) => w.id === Number(selectedWarehouse))?.name}, Periode: {startDate} - {endDate}
                         </span>
                     </h1>
                     <div className="flex items-center gap-2">
@@ -124,7 +137,7 @@ const Inventory = () => {
                                         className="w-full rounded-md border p-2 border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                                     >
                                         <option value="all">Semua Akun</option>
-                                        {warehouses.map((w) => (
+                                        {warehouses.data?.map((w) => (
                                             <option key={w.id} value={w.id}>
                                                 {w.name}
                                             </option>
@@ -186,7 +199,7 @@ const Inventory = () => {
                             <tr>
                                 <th>Tanggal</th>
                                 <th>Invoice</th>
-                                <th>Total</th>
+                                <th>Contact</th>
                                 <th>Cabang</th>
                                 <th>Status</th>
                             </tr>
@@ -221,8 +234,8 @@ const Inventory = () => {
                                                 {transaction.invoice}
                                             </Link>
                                         </td>
-                                        <td className="text-right">{formatNumber(transaction.total_value)}</td>
-                                        <td className="text-end">{transaction.warehouse?.name}</td>
+                                        <td className="">{transaction.contact?.name}</td>
+                                        <td className="text-center">{transaction.warehouse?.name}</td>
                                         <td className="text-center">{transaction.status}</td>
                                     </tr>
                                 ))
@@ -232,7 +245,12 @@ const Inventory = () => {
                 </div>
                 <div className="px-4">{transactions.last_page > 1 && <Paginator links={transactions} handleChangePage={handleChangePage} />}</div>
             </div>
-            <ProductTable warehouse={warehouse} warehouseName={warehouseName} notification={(type, message) => setNotification(type, message)} />
+            <ProductTable
+                warehouse={warehouse}
+                warehouses={warehouses}
+                warehouseName={warehouseName}
+                notification={(type, message) => setNotification(type, message)}
+            />
         </MainPage>
     );
 };

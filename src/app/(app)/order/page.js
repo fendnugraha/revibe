@@ -1,7 +1,7 @@
 "use client";
 import Button from "@/components/Button";
 import MainPage from "../main";
-import { EyeIcon, PlusIcon, QrCode } from "lucide-react";
+import { EyeIcon, PlusIcon, PrinterIcon, QrCode } from "lucide-react";
 import Modal from "@/components/Modal";
 import CreateOrder from "./components/CreateOrder";
 import { useCallback, useEffect, useState } from "react";
@@ -79,6 +79,7 @@ const Order = () => {
                                 <th>Name</th>
                                 <th>Description</th>
                                 <th>Status</th>
+                                <th>Teknisi</th>
                                 <th>QR Code</th>
                             </tr>
                         </thead>
@@ -88,24 +89,25 @@ const Order = () => {
                                     <tr key={order.id}>
                                         <td>
                                             <span className="text-slate-500 block text-xs">{order.date_issued}</span>
-                                            <Link href={`/order/detail/${order.order_number}`} className="hover:underline">
+                                            <Link href={`/order/detail/${order.order_number}`} className="hover:underline font-bold">
                                                 {order.order_number}
                                             </Link>
                                         </td>
                                         <td>{order.contact?.name}</td>
                                         <td>
-                                            <span className="text-red-500 block text-xs font-bold">{order.phone_type.toUpperCase()}</span>
+                                            <span className="text-blue-500 block text-xs font-bold">{order.phone_type.toUpperCase()}</span>
                                             {order.description}
                                         </td>
                                         <td className="text-center">
                                             <StatusBadge status={order.status} />
                                         </td>
-                                        <td className="text-center">
+                                        <td className="text-center">{order.technician?.name ?? "-"}</td>
+                                        <td className="flex items-center justify-center">
                                             <Link
                                                 href={`/order/order_invoice/${order.order_number}`}
-                                                className="text-slate-500 hover:text-slate-600 cursor-pointer no-print"
+                                                className="text-slate-500 hover:text-slate-600 cursor-pointer"
                                             >
-                                                Cetak QR
+                                                <PrinterIcon size={20} />
                                             </Link>
                                         </td>
                                     </tr>

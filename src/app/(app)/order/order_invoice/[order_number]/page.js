@@ -53,14 +53,11 @@ const OrderNotes = ({ params }) => {
                     </h1>
                     <small className="text-slate-400">Phone Service & Accessories</small>
                     <h1 className="text-sm text-slate-500 mt-2">{order_number}</h1>
+                    <h1 className="text-xs text-slate-500">{formatLongDate(order.date_issued)} </h1>
                 </div>
-
-                <div>
-                    <h1 className="mt-8 text-sm font-bold text-slate-500 text-right">{order.contact?.name}</h1>
-                </div>
-                <div className="text-xs text-slate-500 flex justify-between">
-                    <h1>{formatLongDate(order.date_issued)} </h1>
-                    <h1>No HP: {order.phone_number}</h1>
+                <div className="text-xs text-slate-500 flex justify-between mt-8">
+                    <h1 className="text-sm font-bold text-slate-500">{order.contact?.name}</h1>
+                    <h1>{order.phone_number}</h1>
                 </div>
                 <div>
                     <hr className="mt-2 border-slate-300 border-dashed" />
@@ -73,7 +70,7 @@ const OrderNotes = ({ params }) => {
                 <div className="flex flex-col gap-2 items-center justify-center">
                     <small className="text-slate-500">Scan QR Code</small>
                     <QRCodeSVG value={`${typeof window !== "undefined" ? window.location.origin : ""}/order/tracking/${order.order_number}`} size={200} />
-                    <small className="text-slate-500">No Order: {order.order_number}</small>
+                    <small className="text-slate-500">{order.order_number}</small>
 
                     <small className="text-slate-500">{"***"}</small>
                 </div>
