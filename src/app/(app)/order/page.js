@@ -1,6 +1,5 @@
 "use client";
 import Button from "@/components/Button";
-import MainPage from "../main";
 import { EyeIcon, PlusIcon, PrinterIcon, QrCode } from "lucide-react";
 import Modal from "@/components/Modal";
 import CreateOrder from "./components/CreateOrder";
@@ -10,6 +9,7 @@ import axios from "@/libs/axios";
 import Link from "next/link";
 import StatusBadge from "@/components/StatusBadge";
 import OrderStatus from "./components/OrderStatus";
+import Navigation from "../navigation";
 
 const Order = () => {
     const [orders, setOrders] = useState([]);
@@ -53,12 +53,12 @@ const Order = () => {
     }, [fetchOrders]);
 
     return (
-        <MainPage headerTitle="Service Order">
+        <Navigation headerTitle="Service Order">
             {notification.message && (
                 <Notification type={notification.type} notification={notification.message} onClose={() => setNotification({ type: "", message: "" })} />
             )}
             <OrderStatus orders={orders} />
-            <div className="bg-white rounded-3xl p-4 col-span-3">
+            <div className="bg-white rounded-3xl p-4">
                 <Button buttonType="primary" onClick={() => setIsModalCreateOrderOpen(true)} className={`flex item-center gap-2 mb-4`}>
                     <PlusIcon size={20} /> Add Order
                 </Button>
@@ -71,6 +71,7 @@ const Order = () => {
                         onChange={(e) => setSearch(e.target.value)}
                     />
                 </div>
+
                 <div className="overflow-x-auto">
                     <table className="table w-full text-xs">
                         <thead className="">
@@ -130,7 +131,7 @@ const Order = () => {
                     fetchOrders={fetchOrders}
                 />
             </Modal>
-        </MainPage>
+        </Navigation>
     );
 };
 

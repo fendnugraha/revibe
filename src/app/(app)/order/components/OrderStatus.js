@@ -3,7 +3,7 @@ import StatusBadge from "@/components/StatusBadge";
 const OrderStatus = ({ orders }) => {
     const filterOrderByStatus = (status) => orders.data?.filter((order) => order.status === status).length;
     return (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
+        <div className="hidden sm:grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
             <div className="flex justify-between items-center px-4 py-2 gap-4 bg-white rounded-3xl col-span-3">
                 <div className="w-32 text-center">
                     <StatusBadge status="Pending" />

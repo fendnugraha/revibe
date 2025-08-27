@@ -1,6 +1,5 @@
 "use client";
 import Notification from "@/components/Notification";
-import MainPage from "../main";
 import { useState, useEffect, useCallback } from "react";
 import { ArrowBigDown, ArrowBigUp, FilterIcon, PlusCircleIcon, SearchIcon, XCircleIcon } from "lucide-react";
 import Paginator from "@/components/Paginator";
@@ -14,6 +13,7 @@ import formatDateTime from "@/libs/formatDateTime";
 import formatNumber from "@/libs/formatNumber";
 import ProductTable from "./components/ProductTable";
 import { set } from "date-fns";
+import Navigation from "../navigation";
 
 const getCurrentDate = () => {
     const today = new Date();
@@ -94,7 +94,7 @@ const Inventory = () => {
     };
 
     return (
-        <MainPage headerTitle="Service Order">
+        <Navigation headerTitle="Service Order">
             {notification.message && (
                 <Notification type={notification.type} notification={notification.message} onClose={() => setNotification({ type: "", message: "" })} />
             )}
@@ -251,7 +251,7 @@ const Inventory = () => {
                 warehouseName={warehouseName}
                 notification={(type, message) => setNotification(type, message)}
             />
-        </MainPage>
+        </Navigation>
     );
 };
 
