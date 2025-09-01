@@ -35,7 +35,7 @@ const Login = () => {
         e.preventDefault();
         await login({ email, password, setErrors, setStatus, setMessage, setLoading });
     };
-
+    console.log(loading, message);
     return (
         <div className="w-1/2 flex items-center flex-col">
             <Image src="/revibe-logo.png" alt="Revibe Logo" className="inline" width={100} height={24} priority />
@@ -43,7 +43,7 @@ const Login = () => {
             <form onSubmit={handleSubmit}>
                 <div className="flex flex-col gap-2 mt-4 mb-2">
                     <input
-                        className="px-6 py-3 rounded-2xl focus:border outline-none focus:border-red-500/25 w-80 bg-slate-300 text-red-500"
+                        className="px-6 py-3 rounded-2xl focus:border outline-none focus:border-red-500/25 w-80 bg-white text-red-500"
                         type="email"
                         placeholder="Email"
                         value={email}
@@ -51,7 +51,7 @@ const Login = () => {
                         required
                     />
                     <input
-                        className="px-6 py-3 rounded-2xl focus:border outline-none focus:border-red-500/25 w-80 bg-slate-300 text-red-500"
+                        className="px-6 py-3 rounded-2xl focus:border outline-none focus:border-red-500/25 w-80 bg-white text-red-500"
                         type="password"
                         placeholder="Password"
                         value={password}
@@ -61,7 +61,7 @@ const Login = () => {
                 </div>
                 <button
                     disabled={loading || message === "Login successful!"}
-                    className="px-4 py-2 w-40 bg-red-600 text-white rounded-2xl hover:bg-red-500 cursor-pointer disabled:bg-red-300 disabled:cursor-not-allowed"
+                    className="px-4 py-2 mt-4 w-full bg-red-600 text-white rounded-2xl hover:bg-red-500 cursor-pointer disabled:bg-red-300 disabled:cursor-not-allowed"
                     type="submit"
                 >
                     {loading || message === "Login successful!" ? "Loging in ..." : "Login"}

@@ -1,15 +1,20 @@
 "use client";
 import ProductCard from "@/app/(app)/inventory/components/ProductCard";
 import MainPage from "@/app/(app)/main";
+import Breadcrumb from "@/components/Breadcrumb";
+import Button from "@/components/Button";
+import Input from "@/components/Input";
+import Label from "@/components/Label";
 import Modal from "@/components/Modal";
 import Notification from "@/components/Notification";
 import axios from "@/libs/axios";
 import DateTimeNow from "@/libs/dateTimeNow";
+import { formatRupiah } from "@/libs/format";
 import formatNumber from "@/libs/formatNumber";
 import { set } from "date-fns";
-import { BoxesIcon, CheckCircle, LoaderCircleIcon, MinusIcon, PlusIcon, Trash2Icon } from "lucide-react";
+import { BoxesIcon, CheckCircle, LoaderCircleIcon, MinusIcon, PlusIcon, Trash2Icon, XIcon } from "lucide-react";
 import Link from "next/link";
-import { use, useCallback, useEffect, useState } from "react";
+import { use, useCallback, useEffect, useRef, useState } from "react";
 
 const useDebounce = (value, delay) => {
     const [debouncedValue, setDebouncedValue] = useState(value);
@@ -28,6 +33,18 @@ const useDebounce = (value, delay) => {
 };
 
 const PurchaseOrder = () => {
+    const PurchasePageBreadcrumb = [
+        {
+            name: "Inventory",
+            href: "/inventory",
+            current: false,
+        },
+        {
+            name: "Purchase Order",
+            href: "/inventory/purchase",
+            current: true,
+        },
+    ];
     const [notification, setNotification] = useState({
         type: "",
         message: "",
@@ -43,6 +60,16 @@ const PurchaseOrder = () => {
     const [cartPo, setCartPo] = useState([]);
     const [contacts, setContacts] = useState([]);
     const [totalPrice, setTotalPrice] = useState(0);
+    const [showProductList, setShowProductList] = useState(false);
+    const productReff = useRef();
+
+    useEffect(() => {
+        document.addEventListener("click", (event) => {
+            if (productReff.current && !productReff.current.contains(event.target)) {
+                setShowProductList(false);
+            }
+        });
+    }, []);
 
     const closeModal = () => {
         setIsModalCheckOutOpen(false);
@@ -210,225 +237,245 @@ const PurchaseOrder = () => {
             {notification.message && (
                 <Notification type={notification.type} notification={notification.message} onClose={() => setNotification({ type: "", message: "" })} />
             )}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 h-[calc(100vh-140px)] p-4">
-                <div className="sm:col-span-2">
-                    <div>
-                        <div className="flex items-center">
-                            <input
+            <Breadcrumb BreadcrumbArray={PurchasePageBreadcrumb} />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="col-span-1 sm:col-span-2">
+                    <div className="relative" ref={productReff}>
+                        <Label>Cari barang</Label>
+                        <div className="flex items-end gap-4 mb-2">
+                            <Input
                                 type="search"
-                                className="bg-gray-50 text-gray-900 text-sm rounded-full outline-1 outline-gray-300 focus:outline-orange-500/50 focus:outline-2 block w-full px-4 py-2.5"
-                                placeholder="Cari Barang"
-                                value={search}
+                                onFocus={() => setShowProductList(true)}
                                 onChange={(e) => setSearch(e.target.value)}
+                                className="w-full"
+                                placeholder="Search"
                             />
                         </div>
-                        <div className="mt-4">
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-1 sm:gap-3 max-h-[calc((78px+4px)*5))] overflow-y-scroll">
-                                {productList?.data?.map((product) => (
-                                    <ProductCard key={product.id} product={product} onAddToCart={handleAddToCart} />
-                                ))}
-                            </div>
+
+                        <div
+                            className={`absolute min-w-3/4 bg-white dark:bg-slate-600 rounded-xl shadow ${
+                                showProductList ? "py-1 h-fit border border-lime-500 dark:border-lime-100" : "h-0 overflow-hidden"
+                            } transition-all duration-300 ease-in-out`}
+                        >
+                            {productList.data?.map((item) => (
+                                <div
+                                    className="flex justify-between items-center hover:bg-slate-100 dark:hover:bg-slate-700 px-4 py-2 last:border-0 border-b border-dashed border-slate-300"
+                                    key={item.id}
+                                >
+                                    <div>
+                                        <h2 className="text-sm">{item.name}</h2>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                                            {formatRupiah(item.price)} {item.category?.name}
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={() => handleAddToCart(item)}
+                                        className="rounded-lg p-2 text-xs bg-lime-300 dark:bg-lime-500 dark:text-lime-900 cursor-pointer focus:scale-95"
+                                    >
+                                        Tambah part
+                                    </button>
+                                </div>
+                            ))}
                         </div>
                     </div>
-                </div>
-                <div className="bg-white rounded-3xl px-6 py-4 hidden sm:flex flex-col justify-between">
-                    <div>
-                        <h1 className="text-lg font-bold mb-4">
-                            Cart ({cartPo.length} {cartPo.length > 1 ? "products" : "product"})
+                    <div className="mt-4 card">
+                        <h1 className="mb-2 font-bold text-lg px-4 pt-4">
+                            Order List{" "}
+                            <span className="text-gray-500">
+                                ({cartPo.length} {cartPo.length === 1 ? "item" : "items"})
+                            </span>
                         </h1>
-                        <div className="max-h-[calc(49px*7)] overflow-y-scroll">
+                        <div className="max-h-[calc(85px*5)] overflow-auto border-t border-slate-300">
                             {cartPo.length > 0 ? (
                                 cartPo.map((item) => (
-                                    <div key={item.id} className="p-2 rounded-2xl border border-slate-200 mb-2 flex items-center gap-3">
-                                        <div className="size-[40px] flex-shrink-0 bg-slate-300 rounded-lg flex justify-center items-center">
-                                            <BoxesIcon size={18} className="text-slate-500" />
-                                        </div>
-                                        <div className="flex flex-col justify-between h-[50px] w-full">
-                                            <h1 className="text-xs font-bold truncate">{item.name?.toUpperCase()}</h1>
-                                            <div className="flex gap-4 w-full items-center">
-                                                <div className="flex items-center justify-between w-[72px]">
-                                                    <button className="border border-gray-300 rounded-full active:border-red-500">
-                                                        <PlusIcon size={18} className="text-green-500" onClick={() => handleIncrementQuantity(item)} />
+                                    <div className="flex justify-between items-center p-4 last:border-0 border-b border-dashed border-slate-300" key={item.id}>
+                                        <div>
+                                            <h2 className="mb-2 font-semibold text-sm">{item.name}</h2>
+                                            <div className="flex gap-4">
+                                                <div className="flex items-center border text-sm border-slate-300 rounded-xl w-fit h-fit">
+                                                    <button onClick={() => handleDecrementQuantity(item)} disabled={item.quantity === 1} className="py-1 px-2">
+                                                        <MinusIcon size={20} />
                                                     </button>
-                                                    <span className="mx-2 text-sm">{item.quantity}</span>
-                                                    <button className="border border-gray-300 rounded-full active:border-red-500">
-                                                        <MinusIcon size={18} className="text-red-500" onClick={() => handleDecrementQuantity(item)} />
+                                                    <h1 className="border-l border-r border-slate-300 px-4 py-1 bg-slate-300">{item.quantity}</h1>
+                                                    <button onClick={() => handleIncrementQuantity(item)} className="py-1 px-2">
+                                                        <PlusIcon size={20} />
                                                     </button>
                                                 </div>
-                                                <input
-                                                    type="number"
-                                                    min="0"
-                                                    step="100"
-                                                    className=" bg-gray-50 text-xs text-end text-gray-900 w-36 rounded-full outline-1 outline-gray-300 focus:outline-orange-500/50 focus:outline-2 block px-4 py-1"
-                                                    value={item.current_cost}
-                                                    onChange={(e) => handleUpdatePrice(item, e.target.value)}
-                                                />
+                                                <div className="flex items-start gap-2">
+                                                    <label className="font-medium text-xs text-gray-700 dark:text-white mb-1">Rp.</label>
+                                                    <input
+                                                        type="number"
+                                                        value={item.current_cost}
+                                                        onChange={(e) => handleUpdatePrice(item, e.target.value)}
+                                                        className="w-auto text-sm border border-slate-300 rounded-xl px-4 py-1"
+                                                        placeholder="Harga"
+                                                    />
+                                                </div>
                                             </div>
                                         </div>
-                                        <button className="ml-auto self-start" onClick={() => handleRemoveFromPart(item)}>
-                                            <Trash2Icon size={18} className="text-red-500" />
-                                        </button>
+                                        <div className="flex items-center gap-4">
+                                            <h1 className="text-lg font-semibold">{formatRupiah(item.current_cost * item.quantity)}</h1>
+                                            <button
+                                                onClick={() => handleRemoveFromPart(item)}
+                                                className="bg-red-500 text-white hover:bg-red-400 rounded-lg p-2 text-xs  cursor-pointer focus:scale-95"
+                                            >
+                                                <XIcon size={20} />
+                                            </button>
+                                        </div>
                                     </div>
                                 ))
                             ) : (
-                                <div className="flex justify-center items-center h-full">
-                                    <h1 className="text-lg">Cart is empty</h1>
+                                <div className="flex justify-center items-center h-full py-12">
+                                    <h1 className="text-sm text-slate-300">Cart is empty</h1>
                                 </div>
                             )}
                         </div>
                     </div>
-                    <div className="mt-4">
-                        <div className="flex justify-between">
-                            <h1 className="text-sm">Quantity</h1>
-                            <h1 className="text-sm font-bold">
-                                {formatNumber(calculateTotalQuantity())}{" "}
-                                <span className="text-xs font-light">{calculateTotalQuantity() > 1 ? "Items" : "Item"}</span>
-                            </h1>
-                        </div>
-                        <div className="flex justify-between">
-                            <h1 className="text-sm font-bold">Total</h1>
-                            <h1 className="text-sm font-bold">
-                                <span className="text-xs font-light">Rp</span> {formatNumber(totalPrice)}
-                            </h1>
-                        </div>
-                        <div className="flex justify-between gap-2 mt-2">
-                            <button
-                                onClick={() => setIsModalCheckOutOpen(true)}
-                                disabled={cartPo.length === 0}
-                                className="w-full cursor-pointer bg-green-600 hover:bg-green-700 text-white rounded-full py-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                Checkout
-                            </button>
-                            <button
-                                onClick={() => handleClearPart()}
-                                disabled={cartPo.length === 0}
-                                className="bg-red-600 hover:bg-red-700 text-white rounded-full py-2 px-3 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                <Trash2Icon size={18} className="" />
-                            </button>
-                        </div>
-                    </div>
-                    <Modal isOpen={isModalCheckOutOpen} onClose={closeModal} maxWidth={"max-w-2xl"} modalTitle="Checkout" bgColor="bg-white">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <div className="mb-4">
-                                    <label className="block mb-1 text-sm font-medium text-gray-900">Tanggal</label>
-                                    <input
-                                        type="datetime-local"
-                                        className="w-full border bg-white border-slate-200 px-4 py-1 rounded-xl"
-                                        value={formData.date_issued}
-                                        onChange={(e) => setFormData({ ...formData, date_issued: e.target.value })}
-                                    />
-                                </div>
-                                <div className="mb-4">
-                                    <label className="block mb-1 text-sm font-medium text-gray-900">Discount (Rp)</label>
-                                    <input
-                                        type="number"
-                                        className="w-full border bg-white border-slate-200 px-4 py-1 rounded-xl"
-                                        value={formData.discount}
-                                        onChange={(e) => setFormData({ ...formData, discount: e.target.value })}
-                                    />
-                                </div>
-                                <div className="mb-4">
-                                    <label className="block mb-1 text-sm font-medium text-gray-900">Biaya Pengiriman (Rp)</label>
-                                    <input
-                                        type="number"
-                                        className="w-full border bg-white border-slate-200 px-4 py-1 rounded-xl"
-                                        value={formData.shipping_cost}
-                                        onChange={(e) => setFormData({ ...formData, shipping_cost: e.target.value })}
-                                    />
-                                </div>
-                            </div>
-                            <div>
-                                <div className="flex bg-indigo-400 w-fit rounded-xl mb-2">
-                                    <button
-                                        className={`${
-                                            formData.paymentMethod === "cash" ? "bg-indigo-600 text-white" : "text-white/50"
-                                        } py-0.5 px-3 cursor-pointer disabled:cursor-wait rounded-xl`}
-                                        disabled={loading}
-                                        onClick={() => setFormData({ ...formData, paymentMethod: "cash", paymentAccountID: "" })}
-                                    >
-                                        Cash
-                                    </button>
-                                    <button
-                                        className={`${
-                                            formData.paymentMethod === "credit" ? "bg-indigo-600 text-white" : "text-white/50"
-                                        } text-white py-0.5 px-3 cursor-pointer disabled:cursor-wait rounded-xl`}
-                                        disabled={loading}
-                                        onClick={() => setFormData({ ...formData, paymentMethod: "credit", paymentAccountID: 7 })}
-                                    >
-                                        Credit
-                                    </button>
-                                </div>
-                                <div>
-                                    <label className="block mb-1 text-sm font-medium text-gray-900">Account Pembayaran</label>
-                                    <select
-                                        className="w-full border bg-white border-slate-200 px-4 py-1 rounded-xl mb-4 disabled:bg-slate-300 disabled:cursor-not-allowed"
-                                        value={formData.paymentAccountID}
-                                        onChange={(e) => setFormData({ ...formData, paymentAccountID: e.target.value })}
-                                        disabled={loading || formData.paymentMethod === "credit"}
-                                        required
-                                    >
-                                        <option value="">Pilih Account Pembayaran</option>
-                                        {accounts?.map((account) => (
-                                            <option key={account.id} value={account.id}>
-                                                {account.acc_name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block mb-1 text-sm font-medium text-gray-900">Supplier</label>
-                                    <select
-                                        className="w-full border bg-white border-slate-200 px-4 py-1 rounded-xl mb-4 disabled:bg-slate-300 disabled:cursor-not-allowed"
-                                        value={formData.contact_id}
-                                        onChange={(e) => setFormData({ ...formData, contact_id: e.target.value })}
-                                        disabled={loading}
-                                        required
-                                    >
-                                        <option value="">Pilih Supplier</option>
-                                        {contacts?.data?.map((contact) => (
-                                            <option key={contact.id} value={contact.id}>
-                                                {contact.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-
-                                <table className="w-full text-xs h-fit">
-                                    <tbody>
-                                        <tr>
-                                            <td className="font-semibold p-1">Total</td>
-                                            <td className="text-right p-1">Rp {formatNumber(totalPrice)}</td>
-                                        </tr>
-                                        <tr>
-                                            <td className="font-semibold p-1">Discount</td>
-                                            <td className="text-right p-1 text-red-500">Rp {formatNumber(formData.discount)}</td>
-                                        </tr>
-                                        <tr>
-                                            <td className="font-semibold p-1">Biaya Pengiriman</td>
-                                            <td className="text-right p-1">Rp {formatNumber(formData.shipping_cost)}</td>
-                                        </tr>
-                                        <tr className="border-t border-slate-500 border-dashed">
-                                            <td className="font-semibold p-1">Total Pembayaran</td>
-                                            <td className="text-right p-1">
-                                                Rp {formatNumber(totalPrice - formData.discount + Number(formData.shipping_cost))}
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        <button
-                            onClick={handleCheckOut}
-                            className="w-full mt-4 bg-indigo-600 hover:bg-indigo-500 text-white py-4 px-6 disabled:bg-slate-300 disabled:cursor-wait rounded-full"
+                </div>
+                <div className="">
+                    <div>
+                        <Label>Supplier</Label>
+                        <select
+                            className="form-select w-full !bg-white"
+                            value={formData.contact_id}
+                            onChange={(e) => setFormData({ ...formData, contact_id: e.target.value })}
                             disabled={loading}
+                            required
                         >
-                            {loading ? <LoaderCircleIcon className="animate-spin" /> : "Simpan"}
-                        </button>
-                    </Modal>
+                            <option value="">Pilih Supplier</option>
+                            {contacts?.data?.map((contact) => (
+                                <option key={contact.id} value={contact.id}>
+                                    {contact.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="mt-4 card p-4">
+                        <h1 className="font-semibold text-sm">Total Bayar</h1>
+                        <h1 className="font-semibold text-3xl">{formatRupiah(totalPrice)}</h1>
+                    </div>
+                    <Button buttonType="dark" onClick={() => setIsModalCheckOutOpen(true)} disabled={cartPo.length === 0} className="w-full mt-4">
+                        Checkout
+                    </Button>
                 </div>
             </div>
+            <Modal isOpen={isModalCheckOutOpen} onClose={closeModal} maxWidth={"max-w-2xl"} modalTitle="Checkout" bgColor="bg-white">
+                <div className="grid grid-cols-2 gap-4">
+                    <div>
+                        <div className="mb-4">
+                            <label className="block mb-1 text-sm font-medium text-gray-900">Tanggal</label>
+                            <input
+                                type="datetime-local"
+                                className="w-full border bg-white border-slate-200 px-4 py-1 rounded-xl"
+                                value={formData.date_issued}
+                                onChange={(e) => setFormData({ ...formData, date_issued: e.target.value })}
+                            />
+                        </div>
+                        <div className="mb-4">
+                            <label className="block mb-1 text-sm font-medium text-gray-900">Discount (Rp)</label>
+                            <input
+                                type="number"
+                                className="w-full border bg-white border-slate-200 px-4 py-1 rounded-xl"
+                                value={formData.discount}
+                                onChange={(e) => setFormData({ ...formData, discount: e.target.value })}
+                            />
+                        </div>
+                        <div className="mb-4">
+                            <label className="block mb-1 text-sm font-medium text-gray-900">Biaya Pengiriman (Rp)</label>
+                            <input
+                                type="number"
+                                className="w-full border bg-white border-slate-200 px-4 py-1 rounded-xl"
+                                value={formData.shipping_cost}
+                                onChange={(e) => setFormData({ ...formData, shipping_cost: e.target.value })}
+                            />
+                        </div>
+                    </div>
+                    <div>
+                        <div className="flex bg-indigo-400 w-fit rounded-xl mb-2">
+                            <button
+                                className={`${
+                                    formData.paymentMethod === "cash" ? "bg-indigo-600 text-white" : "text-white/50"
+                                } py-0.5 px-3 cursor-pointer disabled:cursor-wait rounded-xl`}
+                                disabled={loading}
+                                onClick={() => setFormData({ ...formData, paymentMethod: "cash", paymentAccountID: "" })}
+                            >
+                                Cash
+                            </button>
+                            <button
+                                className={`${
+                                    formData.paymentMethod === "credit" ? "bg-indigo-600 text-white" : "text-white/50"
+                                } text-white py-0.5 px-3 cursor-pointer disabled:cursor-wait rounded-xl`}
+                                disabled={loading}
+                                onClick={() => setFormData({ ...formData, paymentMethod: "credit", paymentAccountID: 7 })}
+                            >
+                                Credit
+                            </button>
+                        </div>
+                        <div>
+                            <label className="block mb-1 text-sm font-medium text-gray-900">Account Pembayaran</label>
+                            <select
+                                className="w-full border bg-white border-slate-200 px-4 py-1 rounded-xl mb-4 disabled:bg-slate-300 disabled:cursor-not-allowed"
+                                value={formData.paymentAccountID}
+                                onChange={(e) => setFormData({ ...formData, paymentAccountID: e.target.value })}
+                                disabled={loading || formData.paymentMethod === "credit"}
+                                required
+                            >
+                                <option value="">Pilih Account Pembayaran</option>
+                                {accounts?.map((account) => (
+                                    <option key={account.id} value={account.id}>
+                                        {account.acc_name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block mb-1 text-sm font-medium text-gray-900">Supplier</label>
+                            <select
+                                className="w-full border bg-white border-slate-200 px-4 py-1 rounded-xl mb-4 disabled:bg-slate-300 disabled:cursor-not-allowed"
+                                value={formData.contact_id}
+                                onChange={(e) => setFormData({ ...formData, contact_id: e.target.value })}
+                                disabled={loading}
+                                required
+                            >
+                                <option value="">Pilih Supplier</option>
+                                {contacts?.data?.map((contact) => (
+                                    <option key={contact.id} value={contact.id}>
+                                        {contact.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <table className="w-full text-xs h-fit">
+                            <tbody>
+                                <tr>
+                                    <td className="font-semibold p-1">Total</td>
+                                    <td className="text-right p-1">Rp {formatNumber(totalPrice)}</td>
+                                </tr>
+                                <tr>
+                                    <td className="font-semibold p-1">Discount</td>
+                                    <td className="text-right p-1 text-red-500">Rp {formatNumber(formData.discount)}</td>
+                                </tr>
+                                <tr>
+                                    <td className="font-semibold p-1">Biaya Pengiriman</td>
+                                    <td className="text-right p-1">Rp {formatNumber(formData.shipping_cost)}</td>
+                                </tr>
+                                <tr className="border-t border-slate-500 border-dashed">
+                                    <td className="font-semibold p-1">Total Pembayaran</td>
+                                    <td className="text-right p-1">Rp {formatNumber(totalPrice - formData.discount + Number(formData.shipping_cost))}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <button
+                    onClick={handleCheckOut}
+                    className="w-full mt-4 bg-indigo-600 hover:bg-indigo-500 text-white py-4 px-6 disabled:bg-slate-300 disabled:cursor-wait rounded-full"
+                    disabled={loading}
+                >
+                    {loading ? <LoaderCircleIcon className="animate-spin" /> : "Simpan"}
+                </button>
+            </Modal>
         </MainPage>
     );
 };

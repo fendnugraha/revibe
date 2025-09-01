@@ -80,7 +80,7 @@ const OrderDetail = ({ params }) => {
                     Order Number: <span className="font-bold">{order_number}</span>{" "}
                 </h1>
             </div>
-            <div className="bg-white p-4 sm:p-6 rounded-3xl drop-shadow-sm">
+            <div className="p-4 sm:p-6 card">
                 <div className="grid grid-cols-2 gap-4 mb-4">
                     <table className="w-full text-sm">
                         <tbody>
@@ -211,7 +211,7 @@ const OrderDetail = ({ params }) => {
                     </div>
                 )}
             </div>
-            <Modal isOpen={isModalCreatePaymentOpen} onClose={closeModal} modalTitle="Input Pembayaran" maxWidth="max-w-lg">
+            <Modal isOpen={isModalCreatePaymentOpen} onClose={closeModal} modalTitle="Input Pembayaran" maxWidth="max-w-2xl">
                 <CreatePaymentFrom
                     order={order}
                     isModalOpen={setIsModalCreatePaymentOpen}

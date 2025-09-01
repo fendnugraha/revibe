@@ -245,12 +245,7 @@ const Inventory = () => {
                 </div>
                 <div className="px-4">{transactions.last_page > 1 && <Paginator links={transactions} handleChangePage={handleChangePage} />}</div>
             </div>
-            <ProductTable
-                warehouse={warehouse}
-                warehouses={warehouses}
-                warehouseName={warehouseName}
-                notification={(type, message) => setNotification(type, message)}
-            />
+            <ProductTable warehouse={warehouse} warehouses={warehouses} warehouseName={warehouseName} notification={setNotification} />
         </MainPage>
     );
 };

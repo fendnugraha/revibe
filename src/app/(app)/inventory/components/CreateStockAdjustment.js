@@ -53,12 +53,18 @@ const CreateStockAdjustment = ({ isModalOpen, product, warehouse, warehouses, no
         setLoading(true);
         try {
             const response = await axios.post("/api/stock-adjustment", formData);
-            notification("success", response.data.message);
+            notification({
+                type: "success",
+                message: response.data.message,
+            });
             isModalOpen(false);
             fetchWarehouseStock();
         } catch (error) {
             setErrors(error.response?.data?.errors || ["Something went wrong."]);
-            notification("error", error.response?.data?.message || "Something went wrong.");
+            notification({
+                type: "error",
+                message: error.response?.data?.message || "Something went wrong.",
+            });
         } finally {
             setLoading(false);
         }

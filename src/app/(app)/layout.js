@@ -9,7 +9,7 @@ const AppLayout = ({ children }) => {
         return <Loading />;
     }
     return (
-        <div className="flex h-screen overflow-hidden">
+        <div className="flex h-screen overflow-hidden dark:bg-slate-800 dark:text-white">
             <Navigation user={user} />
             <div className="flex-1">{children}</div>
         </div>

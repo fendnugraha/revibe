@@ -15,6 +15,8 @@ import { useState } from "react";
 import NavLink from "@/components/NavLink";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/libs/auth";
+import DarkModeToggle from "@/components/DarkModeToggle";
+import { navMenu } from "@/config/NavMenu";
 
 const Navigation = ({ user }) => {
     const { logout } = useAuth();
@@ -23,113 +25,51 @@ const Navigation = ({ user }) => {
     const userRole = user?.role?.role;
     return (
         <>
-            <nav className={`hidden sm:flex sm:flex-col ${isMenuOpen ? "w-64" : "w-16"} h-screen justify-between transition-all duration-200 ease-in`}>
+            <nav
+                className={`bg-white dark:bg-slate-700 dark:text-white hidden sm:flex sm:flex-col ${
+                    isMenuOpen ? "w-64" : "w-16"
+                } h-screen justify-between transition-all duration-200 ease-in`}
+            >
                 {/* Header */}
-                <button className="flex items-center cursor-pointer text-slate-500" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+                <button className="flex items-center cursor-pointer text-sky-800 dark:text-yellow-300">
                     {/* Tombol Toggle */}
-                    <span className="w-16 h-20 flex items-center justify-center flex-shrink-0 text-slate-700">
-                        <Menu size={32} />
+                    <span
+                        className="w-16 h-16 flex items-center justify-center flex-shrink-0 text-slate-700 dark:text-white"
+                        onClick={() => setIsMenuOpen(!isMenuOpen)}
+                    >
+                        <Menu size={28} />
                     </span>
 
                     {/* Logo Text */}
-                    <h1
-                        className={`text-xl text-nowrap font-bold transition-all duration-300 origin-left ${
+                    <div
+                        className={`flex w-full pr-4 justify-between items-center transition-all duration-300 origin-left ${
                             isMenuOpen ? "opacity-100 scale-100" : "opacity-0 scale-95"
                         }`}
                     >
-                        re<span className="text-red-500">V</span>ibe Apps
-                    </h1>
+                        <h1 className={`text-xl font-bold text-nowrap`}>Revibe ID</h1>
+                        <DarkModeToggle />
+                    </div>
                 </button>
                 {/* Middle Menu */}
                 <div className="">
-                    <div className="bg-white border border-slate-200 rounded-3xl drop-shadow-xs">
+                    <div className="">
                         <ul className="py-4">
-                            <li>
-                                <NavLink href="/dashboard" active={pathName.startsWith("/dashboard")}>
-                                    <span className="w-16 h-14 flex items-center justify-center flex-shrink-0 text-slate-500">
-                                        <LayoutDashboardIcon size={20} className="" />
-                                    </span>
-                                    <span
-                                        className={`text-sm transition-all duration-300 origin-left ${
-                                            isMenuOpen ? "opacity-100 scale-100" : "opacity-0 scale-95"
-                                        }`}
-                                    >
-                                        Dashboard
-                                    </span>
-                                </NavLink>
-                            </li>
-                            <li>
-                                <NavLink href="/order" active={pathName.startsWith("/order")}>
-                                    <span className="w-16 h-14 flex items-center justify-center flex-shrink-0 text-slate-500">
-                                        <ArrowLeftRightIcon size={20} className="" />
-                                    </span>
-                                    <span
-                                        className={`text-sm transition-all duration-300 origin-left ${
-                                            isMenuOpen ? "opacity-100 scale-100" : "opacity-0 scale-95"
-                                        }`}
-                                    >
-                                        Order
-                                    </span>
-                                </NavLink>
-                            </li>
-                            <li>
-                                <NavLink href="/inventory" active={pathName.startsWith("/inventory")}>
-                                    <span className="w-16 h-14 flex items-center justify-center flex-shrink-0 text-slate-500">
-                                        <BoxesIcon size={20} className="" />
-                                    </span>
-                                    <span
-                                        className={`text-sm transition-all duration-300 origin-left ${
-                                            isMenuOpen ? "opacity-100 scale-100" : "opacity-0 scale-95"
-                                        }`}
-                                    >
-                                        Inventory
-                                    </span>
-                                </NavLink>
-                            </li>
-                            {userRole === "Administrator" && (
-                                <>
-                                    <li>
-                                        <NavLink href="/finance" active={pathName.startsWith("/finance")}>
-                                            <span className="w-16 h-14 flex items-center justify-center flex-shrink-0 text-slate-500">
-                                                <DollarSignIcon size={20} className="" />
-                                            </span>
-                                            <span
-                                                className={`text-sm transition-all duration-300 origin-left ${
-                                                    isMenuOpen ? "opacity-100 scale-100" : "opacity-0 scale-95"
-                                                }`}
-                                            >
-                                                Finance
-                                            </span>
-                                        </NavLink>
-                                    </li>
-                                    <li>
-                                        <NavLink href="/summary" active={pathName.startsWith("/summary")}>
-                                            <span className="w-16 h-14 flex items-center justify-center flex-shrink-0 text-slate-500">
-                                                <ChartAreaIcon size={20} className="" />
-                                            </span>
-                                            <span
-                                                className={`text-sm transition-all duration-300 origin-left ${
-                                                    isMenuOpen ? "opacity-100 scale-100" : "opacity-0 scale-95"
-                                                }`}
-                                            >
-                                                Summary
-                                            </span>
-                                        </NavLink>
-                                        <NavLink href="/report" active={pathName.startsWith("/report")}>
-                                            <span className="w-16 h-14 flex items-center justify-center flex-shrink-0 text-slate-500">
-                                                <ScaleIcon size={20} className="" />
-                                            </span>
-                                            <span
-                                                className={`text-sm transition-all duration-300 origin-left ${
-                                                    isMenuOpen ? "opacity-100 scale-100" : "opacity-0 scale-95"
-                                                }`}
-                                            >
-                                                Report
-                                            </span>
-                                        </NavLink>
-                                    </li>
-                                </>
-                            )}
+                            {navMenu.mainMenu.map((item, index) => (
+                                <li key={index}>
+                                    <NavLink href={item.href} active={pathName.startsWith(item.path)}>
+                                        <span className="w-16 h-16 flex items-center justify-center flex-shrink-0 text-slate-500">
+                                            <item.icon size={20} className="" />
+                                        </span>
+                                        <span
+                                            className={`text-sm transition-all duration-300 origin-left ${
+                                                isMenuOpen ? "opacity-100 scale-100" : "opacity-0 scale-0"
+                                            }`}
+                                        >
+                                            {item.name}
+                                        </span>
+                                    </NavLink>
+                                </li>
+                            ))}
                         </ul>
                         {userRole === "Administrator" && (
                             <ul className="mt-4 border-t border-slate-300 py-4">

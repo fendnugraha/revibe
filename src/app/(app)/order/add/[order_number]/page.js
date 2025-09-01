@@ -1,13 +1,18 @@
 "use client";
 import ProductCard from "@/app/(app)/inventory/components/ProductCard";
 import MainPage from "@/app/(app)/main";
+import Breadcrumb from "@/components/Breadcrumb";
+import Button from "@/components/Button";
+import Input from "@/components/Input";
+import Label from "@/components/Label";
 import Modal from "@/components/Modal";
 import Notification from "@/components/Notification";
 import axios from "@/libs/axios";
+import { formatRupiah } from "@/libs/format";
 import formatNumber from "@/libs/formatNumber";
-import { BoxesIcon, CheckCircle, LoaderCircleIcon, MinusIcon, PlusIcon, Trash2Icon } from "lucide-react";
+import { CheckCircle, LoaderCircleIcon, MinusIcon, PlusIcon, Trash2Icon, XIcon } from "lucide-react";
 import Link from "next/link";
-import { use, useCallback, useEffect, useState } from "react";
+import { use, useCallback, useEffect, useRef, useState } from "react";
 
 const useDebounce = (value, delay) => {
     const [debouncedValue, setDebouncedValue] = useState(value);
@@ -26,6 +31,18 @@ const useDebounce = (value, delay) => {
 };
 
 const AddPartsReplacement = ({ params }) => {
+    const OrderPageBreadcrumb = [
+        {
+            name: "Order",
+            href: "/order",
+            current: false,
+        },
+        {
+            name: "Detail Order",
+            href: "/order/detail/",
+            current: true,
+        },
+    ];
     const { order_number } = use(params);
     const [notification, setNotification] = useState({
         type: "",
@@ -40,7 +57,16 @@ const AddPartsReplacement = ({ params }) => {
     const [part, setPart] = useState([]);
     const [totalPrice, setTotalPrice] = useState(0);
     const [isPartsAdded, setIsPartsAdded] = useState(false);
+    const [showProductList, setShowProductList] = useState(false);
+    const productReff = useRef();
 
+    useEffect(() => {
+        document.addEventListener("click", (event) => {
+            if (productReff.current && !productReff.current.contains(event.target)) {
+                setShowProductList(false);
+            }
+        });
+    }, []);
     const closeModal = () => {
         setIsModalCheckOutOpen(false);
     };
@@ -108,7 +134,9 @@ const AddPartsReplacement = ({ params }) => {
 
     // Calculate total price
     const calculateTotalPrice = useCallback(() => {
-        return part.reduce((total, item) => total + item.price * item.quantity, 0);
+        const totalPartcost = part.reduce((total, item) => total + item.price * item.quantity, 0);
+
+        return totalPartcost;
         // return part.reduce((total, item) => total + item.price * item.quantity, 0);
     }, [part]);
 
@@ -146,7 +174,11 @@ const AddPartsReplacement = ({ params }) => {
     const handleCheckOut = async () => {
         setLoading(true);
         try {
-            const response = await axios.post("/api/add-parts-to-order", { order_number: order_number, parts: part, transaction_type: "Order" });
+            const response = await axios.post("/api/add-parts-to-order", {
+                order_number: order_number,
+                parts: part,
+                transaction_type: "Order",
+            });
             setNotification({ type: "success", message: response.data.message });
             handleClearPart();
             setIsModalCheckOutOpen(false);
@@ -157,7 +189,6 @@ const AddPartsReplacement = ({ params }) => {
             setLoading(false);
         }
     };
-
     return (
         <MainPage
             headerTitle={
@@ -183,134 +214,132 @@ const AddPartsReplacement = ({ params }) => {
                     </div>
                 </div>
             )}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 h-[calc(100vh-140px)] p-4">
-                <div className="sm:col-span-2">
-                    <div>
-                        <div className="flex items-center">
-                            <input
+            <Breadcrumb BreadcrumbArray={OrderPageBreadcrumb} />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="col-span-1 sm:col-span-2">
+                    <div className="relative" ref={productReff}>
+                        <Label>Cari barang</Label>
+                        <div className="flex items-end gap-4 mb-2">
+                            <Input
                                 type="search"
-                                className="bg-gray-50 text-gray-900 text-sm rounded-full outline-1 outline-gray-300 focus:outline-orange-500/50 focus:outline-2 block w-full px-4 py-2.5"
-                                placeholder="Cari Barang"
-                                value={search}
+                                onFocus={() => setShowProductList(true)}
                                 onChange={(e) => setSearch(e.target.value)}
+                                className="w-full"
+                                placeholder="Search"
                             />
                         </div>
-                        <div className="mt-4">
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-1 sm:gap-3 max-h-[calc((78px+4px)*5))] overflow-y-scroll">
-                                {productList?.data?.map((product) => (
-                                    <ProductCard key={product.id} product={product} onAddToCart={handleAddToCart} />
-                                ))}
-                            </div>
+
+                        <div
+                            className={`absolute min-w-3/4 bg-white dark:bg-slate-600 rounded-xl shadow ${
+                                showProductList ? "py-1 h-fit border border-lime-500 dark:border-lime-100" : "h-0 overflow-hidden"
+                            } transition-all duration-300 ease-in-out`}
+                        >
+                            {productList.data?.map((item) => (
+                                <div
+                                    className="flex justify-between items-center hover:bg-slate-100 dark:hover:bg-slate-700 px-4 py-2 last:border-0 border-b border-dashed border-slate-300"
+                                    key={item.id}
+                                >
+                                    <div>
+                                        <h2 className="text-sm">{item.name}</h2>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                                            {formatRupiah(item.price)} {item.category?.name}
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={() => handleAddToCart(item)}
+                                        className="rounded-lg p-2 text-xs bg-lime-300 dark:bg-lime-500 dark:text-lime-900 cursor-pointer focus:scale-95"
+                                    >
+                                        Tambah part
+                                    </button>
+                                </div>
+                            ))}
                         </div>
                     </div>
-                </div>
-                <div className="bg-white rounded-3xl px-6 py-4 hidden sm:flex flex-col justify-between">
-                    <div>
-                        <h1 className="text-lg font-bold mb-4">
-                            Order Summary <span className="text-xs text-slate-500 font-light block">{order_number}</span>
+                    <div className="mt-4 card">
+                        <h1 className="mb-2 font-bold text-lg px-4 pt-4">
+                            Order List{" "}
+                            <span className="text-gray-500">
+                                ({part.length} {part.length === 1 ? "item" : "items"})
+                            </span>
                         </h1>
-                        <div className="max-h-[calc(49px*7)] overflow-y-scroll">
+                        <div className="max-h-[calc(85px*5)] overflow-auto border-t border-slate-300">
                             {part.length > 0 ? (
                                 part.map((item) => (
-                                    <div
-                                        key={item.id}
-                                        className="flex justify-between items-center py-2 border-b border-slate-200 border-dashed hover:bg-slate-50"
-                                    >
-                                        <div className="flex gap-2 items-center">
-                                            <div className="w-[30px] bg-slate-400 rounded-lg h-[30px] flex justify-center items-center">
-                                                <BoxesIcon size={18} className="text-slate-50" />
-                                            </div>
-                                            <div>
-                                                <h1 className="text-xs mb-1">{item.name.toUpperCase()}</h1>
-                                                <div className="flex gap-4 items-center">
-                                                    <div className="flex gap-2 items-center bg-slate-300 rounded-full px-0.5 w-fit">
-                                                        <button
-                                                            onClick={() => handleDecrementQuantity(item)}
-                                                            className="text-slate-500 bg-white hover:text-slate-500 cursor-pointer rounded-full"
-                                                        >
-                                                            <MinusIcon size={15} className="" />
-                                                        </button>
-                                                        <h1 className="text-sm text-slate-700">{formatNumber(item.quantity)}</h1>
-                                                        <button
-                                                            onClick={() => handleIncrementQuantity(item)}
-                                                            className="text-slate-500 bg-white hover:text-slate-500 cursor-pointer rounded-full"
-                                                        >
-                                                            <PlusIcon size={15} className="" />
-                                                        </button>
-                                                    </div>
+                                    <div className="flex justify-between items-center p-4 last:border-0 border-b border-dashed border-slate-300" key={item.id}>
+                                        <div>
+                                            <h2 className="mb-2 font-semibold text-sm">{item.name}</h2>
+                                            <div className="flex gap-4">
+                                                <div className="flex items-center border text-sm border-slate-300 rounded-xl w-fit h-fit">
+                                                    <button onClick={() => handleDecrementQuantity(item)} disabled={item.quantity === 1} className="py-1 px-2">
+                                                        <MinusIcon size={20} />
+                                                    </button>
+                                                    <h1 className="border-l border-r border-slate-300 px-4 py-1 bg-slate-300">{item.quantity}</h1>
+                                                    <button onClick={() => handleIncrementQuantity(item)} className="py-1 px-2">
+                                                        <PlusIcon size={20} />
+                                                    </button>
+                                                </div>
+                                                <div className="flex items-start gap-2">
+                                                    <label className="font-medium text-xs text-gray-700 dark:text-white mb-1">Rp.</label>
                                                     <input
                                                         type="number"
                                                         value={item.price}
                                                         onChange={(e) => handleUpdatePrice(item, e.target.value)}
-                                                        className="text-xs p-0.5 rounded-sm text-right outline-1 outline-gray-200 focus:outline-orange-500/50 focus:outline-2 bg-transparent"
+                                                        className="w-auto text-sm border border-slate-300 rounded-xl px-4 py-1"
+                                                        placeholder="Harga"
                                                     />
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="flex gap-2 items-center">
-                                            <button onClick={() => handleRemoveFromPart(item)} className="cursor-pointer hover:scale-110">
-                                                <Trash2Icon size={18} className="text-red-400" />
+                                        <div className="flex items-center gap-4">
+                                            <h1 className="text-lg font-semibold">{formatRupiah(item.price * item.quantity)}</h1>
+                                            <button
+                                                onClick={() => handleRemoveFromPart(item)}
+                                                className="bg-red-500 text-white hover:bg-red-400 rounded-lg p-2 text-xs  cursor-pointer focus:scale-95"
+                                            >
+                                                <XIcon size={20} />
                                             </button>
                                         </div>
                                     </div>
                                 ))
                             ) : (
-                                <div className="flex justify-center items-center h-full">
-                                    <h1 className="text-lg">Cart is empty</h1>
+                                <div className="flex justify-center items-center h-full py-12">
+                                    <h1 className="text-sm text-slate-300">Cart is empty</h1>
                                 </div>
                             )}
                         </div>
                     </div>
-                    <div className="mt-4">
-                        <div className="flex justify-between">
-                            <h1 className="text-sm">Quantity</h1>
-                            <h1 className="text-sm font-bold">
-                                {formatNumber(calculateTotalQuantity())}{" "}
-                                <span className="text-xs font-light">{calculateTotalQuantity() > 1 ? "Items" : "Item"}</span>
-                            </h1>
-                        </div>
-                        <div className="flex justify-between">
-                            <h1 className="text-sm font-bold">Total</h1>
-                            <h1 className="text-sm font-bold">
-                                <span className="text-xs font-light">Rp</span> {formatNumber(totalPrice)}
-                            </h1>
-                        </div>
-                        <div className="flex justify-between gap-2 mt-2">
-                            <button
-                                onClick={() => setIsModalCheckOutOpen(true)}
-                                disabled={part.length === 0}
-                                className="w-full cursor-pointer bg-green-600 hover:bg-green-700 text-white rounded-full py-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                Checkout
-                            </button>
-                            <button
-                                onClick={() => handleClearPart()}
-                                disabled={part.length === 0}
-                                className="bg-red-600 hover:bg-red-700 text-white rounded-full py-2 px-3 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                <Trash2Icon size={18} className="" />
-                            </button>
-                        </div>
+                </div>
+                <div className="">
+                    <div>
+                        <Label>Order Number</Label>
+                        <Input value={order_number} className="w-full" disabled />
                     </div>
-                    <Modal isOpen={isModalCheckOutOpen} onClose={closeModal} maxWidth={"max-w-sm"} modalTitle="Checkout" bgColor="bg-white">
-                        <div className="flex justify-center flex-col items-center gap-2 border-b border-gray-300 border-dashed py-2">
-                            <h1 className="text-7xl text-green-500 font-bold">{calculateTotalQuantity()}</h1>
-                            <span className="text-sm font-light">{calculateTotalQuantity() > 1 ? "Items" : "Item"}</span>
-                        </div>
-                        <div className="flex justify-between items-center my-4">
-                            <h1 className="text-xl">Total</h1>
-                            <h1 className="text-xl">Rp. {formatNumber(totalPrice)}</h1>
-                        </div>
-                        <button
-                            onClick={handleCheckOut}
-                            className="w-full mt-4 bg-indigo-600 hover:bg-indigo-500 text-white py-4 px-6 disabled:bg-slate-300 disabled:cursor-wait rounded-full"
-                            disabled={loading}
-                        >
-                            {loading ? <LoaderCircleIcon className="animate-spin" /> : "Simpan"}
-                        </button>
-                    </Modal>
+                    <div className="mt-4 card p-4">
+                        <h1 className="font-semibold text-sm">Total Bayar</h1>
+                        <h1 className="font-semibold text-3xl">{formatRupiah(totalPrice)}</h1>
+                    </div>
+                    <Button buttonType="dark" onClick={() => setIsModalCheckOutOpen(true)} disabled={part.length === 0} className="w-full mt-4">
+                        Checkout
+                    </Button>
                 </div>
             </div>
+            <Modal isOpen={isModalCheckOutOpen} onClose={closeModal} maxWidth={"max-w-sm"} modalTitle="Checkout" bgColor="bg-white">
+                <div className="flex justify-center flex-col items-center gap-2 border-b border-gray-300 border-dashed py-2">
+                    <h1 className="text-7xl text-green-500 font-bold">{calculateTotalQuantity()}</h1>
+                    <span className="text-sm font-light">{calculateTotalQuantity() > 1 ? "Items" : "Item"}</span>
+                </div>
+                <div className="flex justify-between items-center my-4">
+                    <h1 className="text-xl">Total</h1>
+                    <h1 className="text-xl">Rp. {formatNumber(totalPrice)}</h1>
+                </div>
+                <button
+                    onClick={handleCheckOut}
+                    className="w-full mt-4 bg-indigo-600 hover:bg-indigo-500 text-white py-4 px-6 disabled:bg-slate-300 disabled:cursor-wait rounded-full"
+                    disabled={loading}
+                >
+                    {loading ? <LoaderCircleIcon className="animate-spin" /> : "Simpan"}
+                </button>
+            </Modal>
         </MainPage>
     );
 };

@@ -111,7 +111,7 @@ const ProductTable = ({ warehouse, warehouses, warehouseName, notification }) =>
             `Laporan Stok Gudang ${warehouseName} ${formatDateTime(new Date())}`
         );
     };
-    const findProduct = warehouseStock.find((item) => item.product_id === selectedProduct);
+    const findProduct = warehouseStock.find((item) => item.id === selectedProduct);
     return (
         <>
             <div className="bg-white rounded-3xl p-4">
@@ -203,7 +203,7 @@ const ProductTable = ({ warehouse, warehouses, warehouseName, notification }) =>
                                     <button
                                         onClick={() => {
                                             setIsModalAdjustmentOpen(true);
-                                            setSelectedProduct(item.product_id);
+                                            setSelectedProduct(item.id);
                                         }}
                                         className="cursor-pointer flex items-center gap-1 hover:underline text-cyan-600"
                                     >
@@ -212,7 +212,7 @@ const ProductTable = ({ warehouse, warehouses, warehouseName, notification }) =>
                                     <button
                                         onClick={() => {
                                             setIsModalReversalOpen(true);
-                                            setSelectedProduct(item.product_id);
+                                            setSelectedProduct(item.id);
                                         }}
                                         className="cursor-pointer flex items-center gap-1 hover:underline text-red-600"
                                     >
